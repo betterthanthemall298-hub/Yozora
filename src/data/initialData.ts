@@ -51,7 +51,7 @@ export const INITIAL_ORDERS: Order[] = [];
 
 // Optional sample product template for store owner if they want to add a starter product
 export const SAMPLE_HOODIE_TEMPLATE: Omit<Product, 'id' | 'rating' | 'reviewsCount'> = {
-  name: 'Beyond Signature Oversized',
+  name: 'Yozora Signature Oversized',
   subtitle: 'Signature Heavyweight Oversized Hoodie',
   category: 'oversized',
   price: 890,
@@ -82,9 +82,9 @@ export const SAMPLE_HOODIE_TEMPLATE: Omit<Product, 'id' | 'rating' | 'reviewsCou
 };
 
 export const INITIAL_SETTINGS: StoreSettings = {
-  storeName: 'Beyond',
-  storeSubtitle: 'Beyond Signature Hoodies',
-  announcementText: 'Beyond | شحن مجاني لأي طلب يتجاوز 2000 ج.م في جميع محافظات مصر',
+  storeName: 'Yozora',
+  storeSubtitle: 'Yozora Signature Hoodies',
+  announcementText: 'Yozora | شحن مجاني لأي طلب يتجاوز 2000 ج.م في جميع محافظات مصر',
   brandLogo: '',
   whatsappNumber: '201000000000',
   whatsappUrl: 'https://wa.me/201000000000',
@@ -96,7 +96,7 @@ export const INITIAL_SETTINGS: StoreSettings = {
   quantityShippingMinItems: 2,
   quantityShippingCost: 0,
   comingSoonEnabled: true,
-  comingSoonTitle: 'قريباً في Beyond',
+  comingSoonTitle: 'قريباً في Yozora',
   comingSoonSubtitle: 'ترقبوا قطعاً مميزة بتصاميم حصرية',
-  pushNotificationTopic: 'beyond_orders_alerts'
+  pushNotificationTopic: 'yozora_orders_alerts'
 };

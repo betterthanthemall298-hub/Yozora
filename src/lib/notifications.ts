@@ -530,12 +530,12 @@ export async function testPhoneNotification(_topicOverride?: string, customLogoU
     total: 890,
     governorate: 'القاهرة',
     itemsCount: 1,
-    itemsSummary: 'هودي أوفر سايز بيوند تجريبي',
+    itemsSummary: 'هودي أوفر سايز يوزورا تجريبي',
     logoUrl: logo
   });
 
-  const title = 'Beyond | إشعار تجريبي 🔔';
-  const body = 'نظام الإشعارات شغال بنجاح في متجر Beyond!';
+  const title = 'Yozora | إشعار تجريبي 🔔';
+  const body = 'نظام الإشعارات شغال بنجاح في متجر Yozora!';
 
   sendDesktopNotification(title, body, logo);
 

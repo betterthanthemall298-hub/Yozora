@@ -1,6 +1,6 @@
 {
-  "name": "Beyond",
-  "description": "Beyond Store - متجر بيوند للهوديز الفاخرة",
+  "name": "Yozora",
+  "description": "Yozora Store - متجر يوزورا للهوديز الفاخرة",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

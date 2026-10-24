@@ -567,7 +567,7 @@ export const AdminDashboard: React.FC = () => {
 
       await addProduct({
         name: pName.trim(),
-        subtitle: pSubtitle.trim() || 'Beyond Oversized Hoodie',
+        subtitle: pSubtitle.trim() || 'Yozora Oversized Hoodie',
         category: pCategory,
         price: Number(pPrice),
         originalPrice: numOriginalPrice,
@@ -1204,7 +1204,7 @@ export const AdminDashboard: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="مثال: Beyond Vintage Boxy Hoodie"
+                    placeholder="مثال: Yozora Vintage Boxy Hoodie"
                     value={pName}
                     onChange={(e) => setPName(e.target.value)}
                     className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100"
@@ -1215,7 +1215,7 @@ export const AdminDashboard: React.FC = () => {
                   <label className="block text-xs text-stone-400 mb-1">الوصف الفرعي (العنوان الترويجي)</label>
                   <input
                     type="text"
-                    placeholder="Beyond Charcoal Boxy"
+                    placeholder="Yozora Charcoal Boxy"
                     value={pSubtitle}
                     onChange={(e) => setPSubtitle(e.target.value)}
                     className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100"
@@ -2033,7 +2033,7 @@ export const AdminDashboard: React.FC = () => {
                   onClick={() => {
                     const today = new Date().toISOString().split('T')[0];
                     if (orderStatusFilter === 'all') {
-                      exportOrdersToCSV(orders, `طلبات_Beyond_الكل_${today}`);
+                      exportOrdersToCSV(orders, `طلبات_Yozora_الكل_${today}`);
                     } else {
                       exportOrdersByStatus(orders, orderStatusFilter);
                     }
@@ -2073,7 +2073,7 @@ export const AdminDashboard: React.FC = () => {
                         type="button"
                         onClick={() => {
                           const today = new Date().toISOString().split('T')[0];
-                          exportOrdersToCSV(orders, `طلبات_Beyond_الكل_${today}`);
+                          exportOrdersToCSV(orders, `طلبات_Yozora_الكل_${today}`);
                           setShowExportDropdown(false);
                         }}
                         className="w-full text-right px-3 py-2 rounded-xl text-xs text-stone-200 hover:bg-stone-800 flex items-center justify-between"
@@ -3146,7 +3146,7 @@ export const AdminDashboard: React.FC = () => {
                     شعار المتجر وإشعارات الهاتف (Brand & Notification Logo)
                   </label>
                   <p className="text-[11px] text-stone-400 mt-0.5">
-                    هذا الشعار يظهر في أعلى المتجر وفي شريط التنقل، وأيضاً يظهر في إشعارات طلبات الموبايل كشعار رسمي لـ Beyond
+                    هذا الشعار يظهر في أعلى المتجر وفي شريط التنقل، وأيضاً يظهر في إشعارات طلبات الموبايل كشعار رسمي لـ Yozora
                   </p>
                 </div>
               </div>
@@ -3189,10 +3189,10 @@ export const AdminDashboard: React.FC = () => {
                       type="button"
                       onClick={() => setBrandLogo('/beyond-logo.jpg')}
                       className="px-3 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center gap-1 transition-colors"
-                      title="استعادة لوجو Beyond الأصلي"
+                      title="استعادة لوجو Yozora الأصلي"
                     >
                       <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                      <span>لوجو Beyond الأصلي</span>
+                      <span>لوجو Yozora الأصلي</span>
                     </button>
                     {brandLogo && (
                       <button
@@ -3240,7 +3240,7 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1">
                       <span className="text-[11px] font-bold text-amber-400 truncate">
-                        {storeName || 'Beyond'} • متجر بيوند
+                        {storeName || 'Yozora'} • متجر يوزورا
                       </span>
                       <span className="text-[10px] text-stone-500 shrink-0">الآن</span>
                     </div>

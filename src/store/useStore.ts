@@ -216,8 +216,9 @@ function loadLocalDeviceData() {
           storeName:
             !parsed.settings.storeName ||
             parsed.settings.storeName.includes('نوكتورن') ||
-            parsed.settings.storeName.includes('Nocturne')
-              ? 'Beyond'
+            parsed.settings.storeName.includes('Nocturne') ||
+            parsed.settings.storeName === 'Beyond'
+              ? 'Yozora'
               : parsed.settings.storeName
         }
       : INITIAL_SETTINGS;
@@ -1167,7 +1168,7 @@ let state: StoreState = {
     const newImg: CustomerReviewImage = {
       id: 'rev-img-' + Date.now(),
       imageUrl,
-      caption: caption || 'رأي عميل بيوند',
+      caption: caption || 'رأي عميل يوزورا',
       createdAt: new Date().toISOString().substring(0, 10)
     };
     try {
@@ -1497,13 +1498,16 @@ function setupFirebaseSync() {
         if (!docSnap.exists()) return;
         const data = docSnap.data() as StoreSettings;
         const cleanStoreName =
-          !data.storeName || data.storeName.includes('نوكتورن') || data.storeName.includes('Nocturne')
-            ? 'Beyond'
+          !data.storeName ||
+          data.storeName.includes('نوكتورن') ||
+          data.storeName.includes('Nocturne') ||
+          data.storeName === 'Beyond'
+            ? 'Yozora'
             : data.storeName;
         const normalizedData: StoreSettings = {
           ...data,
           storeName: cleanStoreName,
-          storeSubtitle: data.storeSubtitle || 'Beyond Signature Hoodies'
+          storeSubtitle: data.storeSubtitle && data.storeSubtitle !== 'Beyond Signature Hoodies' ? data.storeSubtitle : 'Yozora Signature Hoodies'
         };
         delete (normalizedData as any).telegramBotToken;
         delete (normalizedData as any).telegramChatId;

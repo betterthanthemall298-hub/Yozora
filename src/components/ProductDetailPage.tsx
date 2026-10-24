@@ -464,7 +464,7 @@ export const ProductDetailPage: React.FC = () => {
               قد يعجبك أيضاً
             </h3>
             <p className="text-xs text-stone-400 mt-1">
-              اخترنا لك قطعاً مميزة أخرى من تشكيلة Beyond الفاخرة
+              اخترنا لك قطعاً مميزة أخرى من تشكيلة Yozora الفاخرة
             </p>
           </div>
           <button

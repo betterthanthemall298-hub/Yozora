@@ -20,7 +20,7 @@ export function getMarketingShareText(product: Product): string {
       : '';
 
   return (
-    `🔥 *${product.name}* من *Beyond Hoodies*\n` +
+    `🔥 *${product.name}* من *Yozora Hoodies*\n` +
     (product.subtitle ? `✨ ${product.subtitle}\n` : '') +
     `💰 السعر: *${product.price} ج.م*${discountText}\n` +
     `📦 قطن مصري 100% ثقيل مع شحن سريع ومعاينة قبل الاستلام.\n\n` +
@@ -33,7 +33,7 @@ export function getMarketingShareText(product: Product): string {
  * Short headline for Instagram and social posts.
  */
 export function getShortMarketingText(product: Product): string {
-  return `🔥 هودي ${product.name} بسعر ${product.price} ج.م من Beyond Hoodies`;
+  return `🔥 هودي ${product.name} بسعر ${product.price} ج.م من Yozora Hoodies`;
 }
 
 /**
@@ -101,7 +101,7 @@ export async function shareNative(product: Product): Promise<boolean> {
 
   try {
     await navigator.share({
-      title: `${product.name} | Beyond Hoodies`,
+      title: `${product.name} | Yozora Hoodies`,
       text: text,
       url: url
     });

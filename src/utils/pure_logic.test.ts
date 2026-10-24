@@ -15,7 +15,7 @@ test('normalizeGovName strips brackets and extra spaces', () => {
 test('getColorSizeStock returns stock correctly with color and fallback', () => {
   const dummyProduct: Product = {
     id: 'prod-1',
-    name: 'Beyond Oversized',
+    name: 'Yozora Oversized',
     subtitle: 'Signature Hoodie',
     category: 'oversized',
     price: 890,
@@ -58,7 +58,7 @@ test('getColorSizeStock returns stock correctly with color and fallback', () => 
 test('getTotalStock calculates sum across colors or general sizesStock', () => {
   const productWithColors: Product = {
     id: 'prod-1',
-    name: 'Beyond Oversized',
+    name: 'Yozora Oversized',
     subtitle: 'Signature Hoodie',
     category: 'oversized',
     price: 890,

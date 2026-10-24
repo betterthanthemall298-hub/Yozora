@@ -42,7 +42,7 @@ export const Footer: React.FC = () => {
                 </div>
               )}
               <span className="text-lg font-black text-stone-100 tracking-wider">
-                {settings.storeName || 'Beyond Hoodies'}
+                {settings.storeName || 'Yozora Hoodies'}
               </span>
             </div>
             <p className="text-stone-400 text-xs max-w-sm leading-relaxed">
@@ -195,7 +195,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Bar */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 text-[11px]">
-          <p>© 2026 جميع الحقوق محفوظة لمتجر (Beyond Hoodies). صُمم بكل فخر في مصر.</p>
+          <p>© 2026 جميع الحقوق محفوظة لمتجر (Yozora Hoodies). صُمم بكل فخر في مصر.</p>
           <button
             type="button"
             onClick={scrollToTop}

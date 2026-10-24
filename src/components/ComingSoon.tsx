@@ -9,14 +9,14 @@ export const ComingSoon: React.FC = () => {
 
   if (settings.comingSoonEnabled === false || items.length === 0) return null;
 
-  const title = settings.comingSoonTitle || 'قريباً في Beyond';
+  const title = settings.comingSoonTitle || 'قريباً في Yozora';
   const subtitle = settings.comingSoonSubtitle || 'ترقبوا قطعاً مميزة بتصاميم حصرية';
 
   const whatsappBase =
     settings.whatsappUrl || (settings.whatsappNumber ? `https://wa.me/${settings.whatsappNumber}` : '');
   const notifyLink = whatsappBase
     ? `${whatsappBase}${whatsappBase.includes('?') ? '&' : '?'}text=${encodeURIComponent(
-        'مرحباً، أود معرفة موعد توفر القطع القادمة في Beyond.'
+        'مرحباً، أود معرفة موعد توفر القطع القادمة في Yozora.'
       )}`
     : '';
 

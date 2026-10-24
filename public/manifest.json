@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Beyond - متجر الهوديز الفاخرة",
-  "short_name": "Beyond",
-  "description": "Beyond Store - متجر بيوند للهوديز الفاخرة",
+  "name": "Yozora - متجر الهوديز الفاخرة",
+  "short_name": "Yozora",
+  "description": "Yozora Store - متجر يوزورا للهوديز الفاخرة",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

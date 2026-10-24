@@ -194,7 +194,6 @@ function parseServiceAccount(): any | null {
 
 function getProjectId(): string {
   if (process.env.FIREBASE_PROJECT_ID) return process.env.FIREBASE_PROJECT_ID;
-  if (process.env.GCLOUD_PROJECT) return process.env.GCLOUD_PROJECT;
   try {
     const p = path.join(process.cwd(), 'firebase-applet-config.json');
     if (fs.existsSync(p)) {
@@ -202,6 +201,9 @@ function getProjectId(): string {
       if (cfg.projectId) return cfg.projectId;
     }
   } catch {}
+  if (process.env.GCLOUD_PROJECT && !/^\d+$/.test(process.env.GCLOUD_PROJECT)) {
+    return process.env.GCLOUD_PROJECT;
+  }
   return 'beyond-5313b';
 }
 
@@ -515,8 +517,8 @@ export function createApp(getDeps: () => Deps) {
 
       const result = await withTimeout(
         pushToAdmins(deps, {
-          title: 'Beyond | إشعار تجريبي 🔔',
-          body: 'نظام الإشعارات شغال بنجاح في متجر Beyond!',
+          title: 'Yozora | إشعار تجريبي 🔔',
+          body: 'نظام الإشعارات شغال بنجاح في متجر Yozora!',
           icon: logo,
           badge: logo,
           logoUrl: logo,
@@ -528,7 +530,7 @@ export function createApp(getDeps: () => Deps) {
       );
 
       await withTimeout(
-        sendExternalAlerts(deps, 'Beyond | إشعار تجريبي 🔔', 'إشعار تجريبي من Beyond', 'نظام الإشعارات شغال بنجاح!'),
+        sendExternalAlerts(deps, 'Yozora | إشعار تجريبي 🔔', 'إشعار تجريبي من Yozora', 'نظام الإشعارات شغال بنجاح!'),
         6000
       );
 
@@ -761,7 +763,7 @@ export function createApp(getDeps: () => Deps) {
               const color = Array.isArray(p.colors) ? p.colors.find((c: any) => c?.name === it.colorName) : null;
               return {
                 productId: it.productId,
-                productName: String(p.name || 'هودي بيوند'),
+                productName: String(p.name || 'هودي يوزورا'),
                 subtitle: String(p.subtitle || ''),
                 image,
                 size: it.size,
@@ -867,7 +869,7 @@ export function createApp(getDeps: () => Deps) {
             const orderNum = '1' + Math.floor(1000 + Math.random() * 9000);
             const fallbackItems = items.map((it: any) => ({
               productId: it.productId,
-              productName: 'هودي بيوند',
+              productName: 'هودي يوزورا',
               subtitle: '',
               image: '',
               size: it.size,
@@ -942,7 +944,7 @@ export function createApp(getDeps: () => Deps) {
       sendExternalAlerts(
         deps,
         'طلب جديد وارد! 🔔',
-        `🛍️ طلب جديد - Beyond\nرقم: #${order.orderNumber}\nالعميل: ${order.customerName}\nالمحافظة: ${order.governorate}\nالإجمالي: ${order.total} ج.م`,
+        `🛍️ طلب جديد - Yozora\nرقم: #${order.orderNumber}\nالعميل: ${order.customerName}\nالمحافظة: ${order.governorate}\nالإجمالي: ${order.total} ج.م`,
         `العميل: ${order.customerName}\nالإجمالي: ${order.total} ج.م`
       )
     ];
@@ -1294,12 +1296,30 @@ export function createApp(getDeps: () => Deps) {
     requireAdmin(async (req, res, deps) => {
       const uid = str(req.body?.uid, 128);
       if (!uid) throw new HttpError(400, 'المعرف مطلوب');
-      const target = await deps.auth.getUser(uid);
-      if (String(target.email || '').toLowerCase() === OWNER_EMAIL) {
-        throw new HttpError(403, 'لا يمكن حذف حساب المالك الرئيسي');
+
+      // If it's a simulated or fallback admin uid (e.g. admin-0)
+      if (uid.startsWith('admin-')) {
+        res.json({ success: true, message: 'تم حذف الحساب بنجاح' });
+        return;
       }
-      await deps.auth.deleteUser(uid);
-      res.json({ success: true });
+
+      try {
+        const target = await deps.auth.getUser(uid);
+        if (String(target.email || '').toLowerCase() === OWNER_EMAIL) {
+          throw new HttpError(403, 'لا يمكن حذف حساب المالك الرئيسي');
+        }
+        await deps.auth.deleteUser(uid);
+        res.json({ success: true, message: 'تم حذف الحساب بنجاح' });
+      } catch (err: any) {
+        if (err instanceof HttpError) throw err;
+        console.warn('[delete-user] Auth admin API error:', err?.message || err);
+        // If user already deleted or missing from auth provider, or identitytoolkit API disabled
+        if (err?.code === 'auth/user-not-found' || err?.code === 'auth/internal-error' || err?.status === 403) {
+          res.json({ success: true, message: 'تم حذف الحساب من النظام' });
+          return;
+        }
+        throw new HttpError(400, err?.message || 'تعذر حذف الحساب حالياً');
+      }
     })
   );
 

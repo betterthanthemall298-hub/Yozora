@@ -104,7 +104,7 @@ export function exportOrdersToCSV(orders: Order[], customFileName?: string) {
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const dateStr = new Date().toISOString().split('T')[0];
-  const finalFileName = customFileName || `طلبات_Beyond_${dateStr}`;
+  const finalFileName = customFileName || `طلبات_Yozora_${dateStr}`;
 
   const link = document.createElement('a');
   link.setAttribute('href', url);
@@ -122,5 +122,5 @@ export function exportOrdersByStatus(orders: Order[], status: OrderStatus) {
   const filtered = orders.filter((o) => o.status === status);
   const statusName = ORDER_STATUS_FILE_NAMES[status] || status;
   const dateStr = new Date().toISOString().split('T')[0];
-  exportOrdersToCSV(filtered, `طلبات_Beyond_${statusName}_${dateStr}`);
+  exportOrdersToCSV(filtered, `طلبات_Yozora_${statusName}_${dateStr}`);
 }

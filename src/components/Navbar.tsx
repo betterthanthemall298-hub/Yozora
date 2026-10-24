@@ -26,7 +26,7 @@ export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const cartCount = getCartItemsCount();
   const wishlistCount = wishlist.length;
-  const storeInitial = (settings.storeName || 'Beyond').trim().charAt(0).toUpperCase();
+  const storeInitial = (settings.storeName || 'Yozora').trim().charAt(0).toUpperCase();
 
   const handleNavClick = (view: ActiveView) => {
     setActiveView(view);
@@ -39,7 +39,7 @@ export const Navbar: React.FC = () => {
       {/* Top Announcement Bar - Calm, luxurious dark stone with amber highlight, NOT garish */}
       <div className="bg-stone-900/90 text-stone-300 border-b border-stone-800/60 py-1.5 px-4 text-center text-xs font-medium">
         <div className="max-w-7xl mx-auto flex items-center justify-center gap-2">
-          <span className="text-amber-400 font-bold">{settings.storeName || 'Beyond'}</span>
+          <span className="text-amber-400 font-bold">{settings.storeName || 'Yozora'}</span>
           <span className="text-stone-600">|</span>
           <span className="truncate">{settings.announcementText}</span>
         </div>
@@ -57,7 +57,7 @@ export const Navbar: React.FC = () => {
               <div className="h-10 sm:h-11 flex items-center justify-center">
                 <img
                   src={settings.brandLogo}
-                  alt={settings.storeName || 'Beyond Logo'}
+                  alt={settings.storeName || 'Yozora Logo'}
                   className="max-h-10 sm:max-h-11 max-w-[120px] sm:max-w-[140px] object-contain rounded-lg"
                 />
               </div>
@@ -68,7 +68,7 @@ export const Navbar: React.FC = () => {
             )}
             <div>
               <span className="text-base sm:text-xl font-black text-stone-100 tracking-wide font-['Tajawal'] line-clamp-1">
-                {settings.storeName || 'Beyond'}
+                {settings.storeName || 'Yozora'}
               </span>
             </div>
           </div>

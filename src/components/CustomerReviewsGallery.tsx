@@ -76,7 +76,7 @@ export const CustomerReviewsGallery: React.FC = () => {
       {/* Section Header */}
       <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
         <h2 className="text-2xl sm:text-3xl font-black text-stone-100">
-          آراء عملاء بيوند
+          آراء عملاء يوزورا
         </h2>
       </div>
 
@@ -172,7 +172,7 @@ export const CustomerReviewsGallery: React.FC = () => {
                   >
                     <img
                       src={item.imageUrl}
-                      alt={item.caption || 'رأي عميل بيوند'}
+                      alt={item.caption || 'رأي عميل يوزورا'}
                       loading="lazy"
                       decoding="async"
                       referrerPolicy="no-referrer"
