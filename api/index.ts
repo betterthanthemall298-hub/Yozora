@@ -268,25 +268,40 @@ export function createApp(getDeps: () => Deps) {
   app.disable('x-powered-by');
 
   // Support Vercel serverless rewrites and custom proxy paths
-  app.use((req, _res, next) => {
-    const matchedPath = req.headers['x-matched-path'] as string | undefined;
-    if (matchedPath && matchedPath.startsWith('/api')) {
+  app.use((req, res, next) => {
+    const rawMatched =
+      (req.headers['x-matched-path'] as string | undefined) ||
+      (req.headers['x-forwarded-url'] as string | undefined) ||
+      (req.headers['x-original-url'] as string | undefined) ||
+      (req.headers['x-rewrite-url'] as string | undefined);
+
+    if (rawMatched && rawMatched.startsWith('/api')) {
       const queryIdx = req.url.indexOf('?');
       const query = queryIdx !== -1 ? req.url.slice(queryIdx) : '';
-      req.url = matchedPath + query;
+      req.url = rawMatched.split('?')[0] + query;
+      (req as any)._parsedUrl = undefined;
     } else if (req.url && !req.url.startsWith('/api')) {
       req.url = '/api' + (req.url.startsWith('/') ? req.url : '/' + req.url);
+      (req as any)._parsedUrl = undefined;
+    } else {
+      (req as any)._parsedUrl = undefined;
+    }
+
+    // CORS and caching headers for Vercel Serverless
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+
+    if (req.method === 'OPTIONS') {
+      res.status(204).end();
+      return;
     }
     next();
   });
 
   app.use(express.json({ limit: '100kb' }));
-
-  app.use('/api', (_req, res, next) => {
-    res.setHeader('Cache-Control', 'no-store');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    next();
-  });
 
   const wrap =
     (fn: (req: Request, res: Response, deps: Deps) => Promise<any>) =>
