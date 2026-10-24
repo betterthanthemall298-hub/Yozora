@@ -25,26 +25,27 @@ export const storage = getStorage(app);
 
 let firestoreInstance: Firestore;
 try {
-  // Use persistent cache with experimentalForceLongPolling for robust connectivity in iframes and proxies
-  firestoreInstance = initializeFirestore(
-    app,
-    {
+  firestoreInstance = getFirestore(app);
+} catch (e1) {
+  try {
+    firestoreInstance = initializeFirestore(app, {
       experimentalForceLongPolling: true,
       localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
-    },
-    config.firestoreDatabaseId || "(default)"
-  );
-} catch {
-  try {
-    firestoreInstance = initializeFirestore(
-      app,
-      {
+    });
+  } catch (e2) {
+    try {
+      firestoreInstance = initializeFirestore(app, {
         experimentalForceLongPolling: true
-      },
-      config.firestoreDatabaseId || "(default)"
-    );
-  } catch {
-    firestoreInstance = getFirestore(app, config.firestoreDatabaseId || "(default)");
+      });
+    } catch (e3) {
+      console.warn('Firestore fallback initialization warning:', e3);
+      try {
+        firestoreInstance = getFirestore(app, config.firestoreDatabaseId || "(default)");
+      } catch (e4) {
+        console.error('Could not initialize firestore:', e4);
+        firestoreInstance = {} as Firestore;
+      }
+    }
   }
 }
 
