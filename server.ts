@@ -8,8 +8,11 @@ async function start() {
   const PORT = Number(process.env.PORT) || 3000;
   const server = express();
 
-  // Mount API app on /api prefix so frontend assets and Vite SPA work properly
-  server.use('/api', app);
+  // Mount API app only for /api prefix so frontend assets and Vite SPA load without interception
+  server.use('/api', (req, res, next) => {
+    req.url = '/api' + (req.url.startsWith('/') ? req.url : '/' + req.url);
+    app(req, res, next);
+  });
 
   // Serve static files in production, or mount Vite middleware in development
   if (process.env.NODE_ENV === 'production') {
