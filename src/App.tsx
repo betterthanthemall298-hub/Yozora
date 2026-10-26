@@ -8,29 +8,16 @@ import { ComingSoon } from './components/ComingSoon';
 import { CustomerReviewsGallery } from './components/CustomerReviewsGallery';
 import { WishlistDrawer } from './components/WishlistDrawer';
 
-const CartPage = React.lazy(() =>
-  import('./components/CartPage.tsx').then((m) => ({ default: m.CartPage }))
-);
-const ProductDetailPage = React.lazy(() =>
-  import('./components/ProductDetailPage.tsx').then((m) => ({ default: m.ProductDetailPage }))
-);
-const OrderTrackingView = React.lazy(() =>
-  import('./components/OrderTrackingView.tsx').then((m) => ({ default: m.OrderTrackingView }))
-);
-const WishlistPage = React.lazy(() =>
-  import('./components/WishlistPage.tsx').then((m) => ({ default: m.WishlistPage }))
-);
+import { CartPage } from './components/CartPage';
+import { ProductDetailPage } from './components/ProductDetailPage';
+import { OrderTrackingView } from './components/OrderTrackingView';
+import { WishlistPage } from './components/WishlistPage';
+import { CheckoutModal } from './components/CheckoutModal';
+import { QuickLookModal } from './components/QuickLookModal';
+import { ProductShareModal } from './components/ProductShareModal';
+
 const AdminDashboard = React.lazy(() =>
-  import('./components/AdminDashboard.tsx').then((m) => ({ default: m.AdminDashboard }))
-);
-const CheckoutModal = React.lazy(() =>
-  import('./components/CheckoutModal.tsx').then((m) => ({ default: m.CheckoutModal }))
-);
-const QuickLookModal = React.lazy(() =>
-  import('./components/QuickLookModal.tsx').then((m) => ({ default: m.QuickLookModal }))
-);
-const ProductShareModal = React.lazy(() =>
-  import('./components/ProductShareModal.tsx').then((m) => ({ default: m.ProductShareModal }))
+  import('./components/AdminDashboard').then((m) => ({ default: m.AdminDashboard }))
 );
 
 import { DeleteConfirmationModal } from './components/DeleteConfirmationModal';
@@ -275,11 +262,9 @@ export default function App() {
       <DeleteConfirmationModal />
       <WishlistDrawer />
 
-      <React.Suspense fallback={null}>
-        <ProductShareModal />
-        <CheckoutModal />
-        <QuickLookModal />
-      </React.Suspense>
+      <ProductShareModal />
+      <CheckoutModal />
+      <QuickLookModal />
 
       {/* Main Navigation Bar */}
       <Navbar />
@@ -299,46 +284,13 @@ export default function App() {
         )}
 
         {/* Dedicated Standalone Cart Page */}
-        {activeView === 'cart' && (
-          <React.Suspense
-            fallback={
-              <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 text-stone-400 py-16 animate-pulse">
-                <div className="w-8 h-8 rounded-full border-2 border-stone-800 border-t-amber-400 animate-spin" />
-                <span className="text-xs font-bold text-stone-500">جاري تحميل السلة...</span>
-              </div>
-            }
-          >
-            <CartPage />
-          </React.Suspense>
-        )}
+        {activeView === 'cart' && <CartPage />}
 
         {/* Dedicated Wishlist Page */}
-        {activeView === 'wishlist' && (
-          <React.Suspense
-            fallback={
-              <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 text-stone-400 py-16 animate-pulse">
-                <div className="w-8 h-8 rounded-full border-2 border-stone-800 border-t-amber-400 animate-spin" />
-                <span className="text-xs font-bold text-stone-500">جاري تحميل المفضلة...</span>
-              </div>
-            }
-          >
-            <WishlistPage />
-          </React.Suspense>
-        )}
+        {activeView === 'wishlist' && <WishlistPage />}
 
         {/* Dedicated Product Detail Page */}
-        {activeView === 'product' && (
-          <React.Suspense
-            fallback={
-              <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 text-stone-400 py-20 animate-pulse">
-                <div className="w-9 h-9 rounded-full border-2 border-stone-800 border-t-amber-400 animate-spin" />
-                <span className="text-xs font-bold text-stone-500">جاري تجهيز القطعة...</span>
-              </div>
-            }
-          >
-            <ProductDetailPage />
-          </React.Suspense>
-        )}
+        {activeView === 'product' && <ProductDetailPage />}
 
         {/* Catalog View */}
         {activeView === 'catalog' && (
@@ -348,18 +300,7 @@ export default function App() {
         )}
 
         {/* Order Tracking View */}
-        {activeView === 'tracking' && (
-          <React.Suspense
-            fallback={
-              <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 text-stone-400 py-16 animate-pulse">
-                <div className="w-8 h-8 rounded-full border-2 border-stone-800 border-t-amber-400 animate-spin" />
-                <span className="text-xs font-bold text-stone-500">جاري التحميل...</span>
-              </div>
-            }
-          >
-            <OrderTrackingView />
-          </React.Suspense>
-        )}
+        {activeView === 'tracking' && <OrderTrackingView />}
 
         {/* Customer Reviews View */}
         {activeView === 'reviews' && (
@@ -371,7 +312,12 @@ export default function App() {
         {/* Admin Dashboard */}
         {activeView === 'admin' && (
           <React.Suspense
-            fallback={<div className="min-h-[60vh] flex items-center justify-center text-stone-500 text-sm">جاري التحميل...</div>}
+            fallback={
+              <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 text-stone-500 text-sm py-20">
+                <div className="w-8 h-8 rounded-full border-2 border-stone-800 border-t-amber-400 animate-spin" />
+                <span>جاري تحميل لوحة التحكم...</span>
+              </div>
+            }
           >
             <AdminDashboard />
           </React.Suspense>

@@ -174,7 +174,7 @@ export const QuickLookModal: React.FC = () => {
               {/* Tag / Badge */}
               <div className="absolute top-4 right-4 flex flex-col gap-1.5 z-10">
                 <span className="px-3 py-1 rounded-xl bg-amber-500 text-black text-xs font-black shadow-lg">
-                  {product.badge || 'BEYOND OVERSIZED'}
+                  {product.badge || 'YOZORA OVERSIZED'}
                 </span>
                 {hasDiscount && (
                   <span className="px-2.5 py-0.5 rounded-lg bg-rose-600 text-white text-[11px] font-bold shadow-md">

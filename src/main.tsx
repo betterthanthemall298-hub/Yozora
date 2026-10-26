@@ -23,7 +23,18 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Beyond Uncaught Error:', error, errorInfo);
+    console.error('Yozora Uncaught Error:', error, errorInfo);
+    // If a dynamic import failed due to network / reload, auto-reload once to self-heal
+    if (
+      error?.message?.includes('Failed to fetch dynamically imported module') ||
+      error?.message?.includes('dynamically imported module')
+    ) {
+      const reloadedKey = 'yozora_chunk_reload_' + window.location.pathname;
+      if (!sessionStorage.getItem(reloadedKey)) {
+        sessionStorage.setItem(reloadedKey, '1');
+        window.location.reload();
+      }
+    }
   }
 
   private handleReload = () => {
@@ -38,11 +49,11 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
       return (
         <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col items-center justify-center p-6 text-center font-['Cairo',system-ui,sans-serif]" dir="rtl">
           <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-4">
-            <span className="text-2xl font-black text-amber-500 tracking-wider">BEYOND</span>
+            <span className="text-2xl font-black text-amber-500 tracking-wider">YOZORA</span>
           </div>
-          <h1 className="text-xl font-bold text-stone-100 mb-2">تعذر تحميل متجر Beyond حالياً</h1>
+          <h1 className="text-xl font-bold text-stone-100 mb-2">تعذر تحميل متجر يوزورا (Yozora) حالياً</h1>
           <p className="text-sm text-stone-400 max-w-sm mb-6 leading-relaxed">
-            حدث خطأ غير متوقع أثناء المعالجة، يرجى إعادة تحميل الصفحة للمتابعة.
+            حدث خطأ غير متوقع أثناء معالجة الصفحة، يرجى إعادة تحميل الصفحة للمتابعة.
           </p>
           <button
             type="button"
@@ -58,17 +69,25 @@ class RootErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
   }
 }
 
+// Handle Vite dynamic import errors globally
+if (typeof window !== 'undefined') {
+  window.addEventListener('vite:preloadError', (event) => {
+    event.preventDefault();
+    window.location.reload();
+  });
+}
+
 // Register Service Worker for Mobile Notifications & Background Support
 if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
       .register('/sw.js')
       .then((reg) => {
-        console.log('Beyond Service Worker registered:', reg.scope);
+        console.log('Yozora Service Worker registered:', reg.scope);
         reg.update().catch(() => {});
       })
       .catch((err) => {
-        console.warn('Beyond Service Worker registration failed:', err);
+        console.warn('Yozora Service Worker registration failed:', err);
       });
   });
 
