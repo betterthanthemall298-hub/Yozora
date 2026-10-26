@@ -146,3 +146,46 @@ test('formatOrderDateTime formats Arabic relative and full datetime', () => {
   const resPast = formatOrderDateTime(undefined, oneHourAgo);
   assert.ok(resPast.timeOnly.length > 0);
 });
+
+test('store sections sort correctly by order ascending and default sections exist', () => {
+  const sections = [
+    { id: 'custom_prints', name: 'الطبعات الخاصة', order: 1, active: true },
+    { id: 'ready_prints', name: 'الطبعات الجاهزة', order: 0, active: true },
+    { id: 'sec-3', name: 'قسم جديد', order: 2, active: false }
+  ];
+
+  const activeSorted = sections
+    .filter((s) => s.active)
+    .sort((a, b) => a.order - b.order);
+
+  assert.equal(activeSorted.length, 2);
+  assert.equal(activeSorted[0].id, 'ready_prints');
+  assert.equal(activeSorted[0].name, 'الطبعات الجاهزة');
+  assert.equal(activeSorted[1].id, 'custom_prints');
+  assert.equal(activeSorted[1].name, 'الطبعات الخاصة');
+});
+
+test('products group into designated sections with fallback to default section', () => {
+  const products: Partial<Product>[] = [
+    { id: 'p1', name: 'هودي 1', sectionId: 'ready_prints' },
+    { id: 'p2', name: 'هودي 2', sectionId: 'custom_prints' },
+    { id: 'p3', name: 'هودي 3' } // fallback to default
+  ];
+
+  const defaultSec = 'ready_prints';
+  const readyList: string[] = [];
+  const customList: string[] = [];
+
+  for (const p of products) {
+    const secId = p.sectionId || defaultSec;
+    if (secId === 'custom_prints') {
+      customList.push(p.id!);
+    } else {
+      readyList.push(p.id!);
+    }
+  }
+
+  assert.deepEqual(readyList, ['p1', 'p3']);
+  assert.deepEqual(customList, ['p2']);
+});
+

@@ -4,8 +4,30 @@ import {
   Coupon,
   GovernorateShipping,
   StoreSettings,
-  Order
+  Order,
+  StoreSection
 } from '../types';
+
+export const INITIAL_SECTIONS: StoreSection[] = [
+  {
+    id: 'ready_prints',
+    name: 'الطبعات الجاهزة',
+    subtitle: 'تصاميم فاخرة جاهزة للشحن الفوري بأعلى دقة طباعة وثبات للألوان',
+    badge: 'شحن فوري',
+    order: 0,
+    active: true,
+    createdAt: '2026-01-01'
+  },
+  {
+    id: 'custom_prints',
+    name: 'الطبعات الخاصة',
+    subtitle: 'قطع مميزة وتصاميم حصرية مخصصة لأصحاب الذوق الفريد',
+    badge: 'إصدار حصري',
+    order: 1,
+    active: true,
+    createdAt: '2026-01-01'
+  }
+];
 
 export const INITIAL_GOVERNORATES: GovernorateShipping[] = [
   { name: 'القاهرة', cost: 45 },
@@ -54,6 +76,7 @@ export const SAMPLE_HOODIE_TEMPLATE: Omit<Product, 'id' | 'rating' | 'reviewsCou
   name: 'Yozora Signature Oversized',
   subtitle: 'Signature Heavyweight Oversized Hoodie',
   category: 'oversized',
+  sectionId: 'ready_prints',
   price: 890,
   originalPrice: 1150,
   description: 'هودي أوفر سايز مصنوع من أفخر أنواع القطن المصري المعالج ضد الانكماش والوبر مع بطانة صوفية فائقة النعومة وقبعة مزدوجة الطبقات.',

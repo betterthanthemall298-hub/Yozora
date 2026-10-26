@@ -37,7 +37,8 @@ import {
   HoodieSize,
   OrderStatus,
   ActiveView,
-  AdminCredentials
+  AdminCredentials,
+  StoreSection
 } from '../types';
 import {
   INITIAL_PRODUCTS,
@@ -46,7 +47,8 @@ import {
   INITIAL_ORDERS,
   INITIAL_SETTINGS,
   INITIAL_GOVERNORATES,
-  SAMPLE_HOODIE_TEMPLATE
+  SAMPLE_HOODIE_TEMPLATE,
+  INITIAL_SECTIONS
 } from '../data/initialData';
 import { getColorSizeStock } from '../utils/product';
 
@@ -115,6 +117,14 @@ export interface StoreState {
   toasts: ToastMessage[];
   addToast: (toast: Omit<ToastMessage, 'id'>) => void;
   removeToast: (id: string) => void;
+
+  // Sections (synced with Firebase Firestore)
+  sections: StoreSection[];
+  addSection: (section: Omit<StoreSection, 'id' | 'createdAt'>) => Promise<string>;
+  updateSection: (id: string, updates: Partial<StoreSection>) => Promise<void>;
+  deleteSection: (id: string) => Promise<void>;
+  reorderSections: (newSections: StoreSection[]) => Promise<void>;
+  resetSectionsToDefault: () => Promise<void>;
 
   // Products (synced with Firebase Firestore)
   products: Product[];
@@ -195,6 +205,7 @@ function loadLocalDeviceData() {
     adminCredentials: { username: '', password: '' } as AdminCredentials,
     activeView: 'home' as ActiveView,
     settings: INITIAL_SETTINGS,
+    sections: INITIAL_SECTIONS,
     products: INITIAL_PRODUCTS,
     coupons: INITIAL_COUPONS,
     governorates: INITIAL_GOVERNORATES,
@@ -234,6 +245,7 @@ function loadLocalDeviceData() {
       wishlist: Array.isArray(parsed.wishlist) ? parsed.wishlist : [],
       activeView: (parsed.activeView === 'admin' ? 'admin' : 'home') as ActiveView,
       settings: parsedSettings,
+      sections: Array.isArray(parsed.sections) && parsed.sections.length > 0 ? parsed.sections : INITIAL_SECTIONS,
       governorates: normalizeGovernorates(parsed.governorates)
     };
   } catch (e) {
@@ -524,11 +536,75 @@ let state: StoreState = {
     state.addToast({ type: 'info', title: 'تم تسجيل الخروج بنجاح' });
   },
 
+  // Sections (synced with Firestore)
+  sections: localDeviceData.sections || INITIAL_SECTIONS,
+  addSection: async (sectionData) => {
+    const newSection: StoreSection = {
+      id: 'sec-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 5),
+      name: sectionData.name.trim(),
+      subtitle: sectionData.subtitle?.trim() || '',
+      badge: sectionData.badge?.trim() || '',
+      order: sectionData.order ?? state.sections.length,
+      active: sectionData.active ?? true,
+      createdAt: new Date().toISOString()
+    };
+    const updated = [...state.sections, newSection].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    update(() => ({ sections: updated }));
+    state.addToast({ type: 'success', title: 'تمت إضافة القسم بنجاح', description: newSection.name });
+    try {
+      await setDoc(doc(db, 'settings', 'sections'), { list: updated });
+    } catch (err) {
+      console.warn('Failed to sync section to Firestore:', err);
+    }
+    return newSection.id;
+  },
+  updateSection: async (id, updates) => {
+    const updated = state.sections.map((s) => (s.id === id ? { ...s, ...updates } : s)).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    update(() => ({ sections: updated }));
+    state.addToast({ type: 'success', title: 'تم حفظ تعديلات القسم' });
+    try {
+      await setDoc(doc(db, 'settings', 'sections'), { list: updated });
+    } catch (err) {
+      console.warn('Failed to update section in Firestore:', err);
+    }
+  },
+  deleteSection: async (id) => {
+    const target = state.sections.find((s) => s.id === id);
+    const updated = state.sections.filter((s) => s.id !== id);
+    update(() => ({ sections: updated }));
+    state.addToast({ type: 'info', title: 'تم حذف القسم', description: target?.name });
+    try {
+      await setDoc(doc(db, 'settings', 'sections'), { list: updated });
+    } catch (err) {
+      console.warn('Failed to delete section from Firestore:', err);
+    }
+  },
+  reorderSections: async (newSections) => {
+    const updated = newSections.map((sec, idx) => ({ ...sec, order: idx }));
+    update(() => ({ sections: updated }));
+    try {
+      await setDoc(doc(db, 'settings', 'sections'), { list: updated });
+    } catch (err) {
+      console.warn('Failed to reorder sections in Firestore:', err);
+    }
+  },
+  resetSectionsToDefault: async () => {
+    update(() => ({ sections: INITIAL_SECTIONS }));
+    state.addToast({ type: 'success', title: 'تمت استعادة الأقسام الافتراضية' });
+    try {
+      await setDoc(doc(db, 'settings', 'sections'), { list: INITIAL_SECTIONS });
+    } catch (err) {
+      console.warn('Failed to reset sections in Firestore:', err);
+    }
+  },
+
   // Products (synced with the database)
   products: localDeviceData.products,
   addProduct: async (productData) => {
+    const defaultSectionId = state.sections[0]?.id || 'ready_prints';
     const newProduct: Product = {
       ...productData,
+      sectionId: productData.sectionId || defaultSectionId,
       id: 'h-' + Date.now().toString(36),
       rating: 5.0,
       reviewsCount: 1
@@ -1551,6 +1627,24 @@ function setupFirebaseSync() {
     );
   } catch (err) {
     console.error('Error setting up shipping listener:', err);
+  }
+
+  // Dynamic store sections
+  try {
+    onSnapshot(
+      doc(db, 'settings', 'sections'),
+      (docSnap) => {
+        if (!docSnap.exists()) return;
+        const data = docSnap.data();
+        if (Array.isArray(data?.list) && data.list.length > 0) {
+          const sorted = [...data.list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+          update(() => ({ sections: sorted }));
+        }
+      },
+      (error) => console.warn('Sections listener error:', error)
+    );
+  } catch (err) {
+    console.error('Error setting up sections listener:', err);
   }
 }
 

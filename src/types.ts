@@ -12,11 +12,22 @@ export interface SizeMeasurement {
   width: number;  // العرض بالسم
 }
 
+export interface StoreSection {
+  id: string; // e.g. "ready_prints", "custom_prints" or custom id
+  name: string; // e.g. "الطبعات الجاهزة", "الطبعات الخاصة"
+  subtitle?: string; // e.g. "تصاميم حصرية مميزة جاهزة للشحن الفوري"
+  badge?: string; // e.g. "شحن فوري", "إصدار حصري"
+  order: number; // 0 for top section, 1 for next, etc.
+  active: boolean; // toggle visibility on/off
+  createdAt?: string;
+}
+
 export interface Product {
   id: string;
   name: string;
   subtitle: string;
   category: HoodieCategory;
+  sectionId?: string; // القسم / مكان العرض (e.g. "ready_prints" or "custom_prints")
   price: number;
   originalPrice?: number;
   description: string;
