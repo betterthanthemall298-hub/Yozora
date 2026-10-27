@@ -36,16 +36,14 @@ class HttpError extends Error {
 /* -------------------------------------------------------------------------- */
 
 const DEFAULT_ADMINS = [
-  'betterthanthemall298@gmail.com',
-  'vdbbdv1234567889@gmail.com',
-  'eslsmgomaa47@gmail.com'
+  'betterthanthemall298@gmail.com'
 ];
 
-let rawOwner = (process.env.OWNER_EMAIL || 'vdbbdv1234567889@gmail.com').toLowerCase().trim();
+let rawOwner = (process.env.OWNER_EMAIL || 'betterthanthemall298@gmail.com').toLowerCase().trim();
 if (!rawOwner.includes('@') && rawOwner.includes('2gmail.com')) {
   rawOwner = rawOwner.replace('2gmail.com', '@gmail.com');
 }
-const OWNER_EMAIL = rawOwner || 'vdbbdv1234567889@gmail.com';
+const OWNER_EMAIL = rawOwner || 'betterthanthemall298@gmail.com';
 
 const envAdmins = (process.env.ADMIN_EMAILS || '')
   .split(',')
@@ -368,7 +366,8 @@ export function createApp(getDeps: () => Deps) {
   /* ------------------------------ basic ------------------------------ */
 
   app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok', service: 'beyond-store' });
+    res.setHeader('Cache-Control', 'public, max-age=30');
+    res.json({ status: 'ok', service: 'yozora-store' });
   });
 
   app.get('/api/push/vapid-public-key', (_req, res) => {
@@ -434,12 +433,10 @@ export function createApp(getDeps: () => Deps) {
       const snap = await deps.db.collection('private_settings').doc('notifications').get();
       const d = snap.exists ? snap.data() || {} : {};
       return {
-        telegramBotToken: str(d.telegramBotToken, 200),
-        telegramChatId: str(d.telegramChatId, 100),
         ntfyTopic: str(d.pushNotificationTopic, 100).replace(/[^a-zA-Z0-9_-]/g, '')
       };
     } catch {
-      return { telegramBotToken: '', telegramChatId: '', ntfyTopic: '' };
+      return { ntfyTopic: '' };
     }
   }
 
@@ -483,19 +480,10 @@ export function createApp(getDeps: () => Deps) {
     return { sent, total: snap.size };
   }
 
-  async function sendExternalAlerts(deps: Deps, title: string, telegramText: string, plainBody: string) {
+  async function sendExternalAlerts(deps: Deps, title: string, _telegramText: string, plainBody: string) {
     const secrets = await getNotificationSecrets(deps);
     const jobs: Promise<any>[] = [];
 
-    if (secrets.telegramBotToken && secrets.telegramChatId) {
-      jobs.push(
-        deps.httpPost(
-          `https://api.telegram.org/bot${secrets.telegramBotToken}/sendMessage`,
-          { 'Content-Type': 'application/json' },
-          JSON.stringify({ chat_id: secrets.telegramChatId, text: telegramText })
-        )
-      );
-    }
     if (secrets.ntfyTopic) {
       jobs.push(
         deps.httpPost(
@@ -595,7 +583,11 @@ export function createApp(getDeps: () => Deps) {
     ['جنوب سيناء', 95]
   ]);
 
+  let cachedShippingMap: { map: Map<string, number>; expires: number } | null = null;
   async function loadShippingMap(deps: Deps): Promise<Map<string, number>> {
+    if (cachedShippingMap && cachedShippingMap.expires > Date.now()) {
+      return cachedShippingMap.map;
+    }
     const map = new Map<string, number>(DEFAULT_SHIPPING_MAP);
     try {
       const doc = await deps.db.collection('settings').doc('shipping').get();
@@ -609,7 +601,23 @@ export function createApp(getDeps: () => Deps) {
     } catch {
       // Safe fallback if Admin DB lacks permissions
     }
+    cachedShippingMap = { map, expires: Date.now() + 60000 };
     return map;
+  }
+
+  let cachedGeneralSettings: { data: any; expires: number } | null = null;
+  async function loadGeneralSettings(deps: Deps): Promise<any> {
+    if (cachedGeneralSettings && cachedGeneralSettings.expires > Date.now()) {
+      return cachedGeneralSettings.data;
+    }
+    try {
+      const genSnap = await deps.db.collection('settings').doc('general').get();
+      const data = genSnap.exists ? genSnap.data() || {} : {};
+      cachedGeneralSettings = { data, expires: Date.now() + 60000 };
+      return data;
+    } catch {
+      return {};
+    }
   }
 
   app.post(
@@ -673,13 +681,10 @@ export function createApp(getDeps: () => Deps) {
 
       try {
         const totalItemQty = items.reduce((s: number, it: any) => s + it.quantity, 0);
-        const genSnap = await deps.db.collection('settings').doc('general').get();
-        if (genSnap.exists) {
-          const genData = genSnap.data() || {};
-          const minQty = Math.max(1, Number(genData.quantityShippingMinItems) || 2);
-          if (genData.quantityShippingEnabled && totalItemQty >= minQty) {
-            shippingCost = Math.max(0, Number(genData.quantityShippingCost ?? 0));
-          }
+        const genData = await loadGeneralSettings(deps);
+        const minQty = Math.max(1, Number(genData.quantityShippingMinItems) || 2);
+        if (genData.quantityShippingEnabled && totalItemQty >= minQty) {
+          shippingCost = Math.max(0, Number(genData.quantityShippingCost ?? 0));
         }
       } catch {
         // Ignore fallback error
@@ -907,7 +912,10 @@ export function createApp(getDeps: () => Deps) {
 
       if (!createdOrder) throw new HttpError(500, 'فشل إنشاء الطلب، يرجى المحاولة مرة أخرى');
       if (!duplicate) {
-        await notifyNewOrder(deps, createdOrder);
+        // Dispatched asynchronously in background so customer checkout returns in <60ms without network latency
+        notifyNewOrder(deps, createdOrder).catch((err) =>
+          console.warn('[notifyNewOrder background alert]', err?.message || err)
+        );
       }
       res.status(201).json({ success: true, order: createdOrder });
     })
@@ -1243,24 +1251,67 @@ export function createApp(getDeps: () => Deps) {
     '/api/admin/users',
     requireAdmin(async (_req, res, deps) => {
       try {
-        const result = await deps.auth.listUsers(200);
-        const users = result.users.filter(isAdminRecord).map((u: any) => ({
-          uid: u.uid,
-          email: u.email,
-          displayName: u.displayName || '',
-          creationTime: u.metadata?.creationTime || '',
-          isOwner: String(u.email || '').toLowerCase() === OWNER_EMAIL
-        }));
-        res.json({ success: true, users });
-      } catch {
-        const fallbackUsers = Array.from(ADMIN_EMAILS).map((email, idx) => ({
-          uid: `admin-${idx}`,
-          email,
-          displayName: 'مسؤول المتجر',
-          creationTime: '',
-          isOwner: email === OWNER_EMAIL
-        }));
-        res.json({ success: true, users: fallbackUsers });
+        let dbAdmins: any[] = [];
+        try {
+          const docSnap = await deps.db.collection('settings').doc('admins').get();
+          if (docSnap.exists) {
+            dbAdmins = docSnap.data()?.list || [];
+          }
+        } catch {}
+
+        let authUsers: any[] = [];
+        try {
+          const result = await deps.auth.listUsers(200);
+          authUsers = result.users.filter(isAdminRecord).map((u: any) => ({
+            uid: u.uid,
+            email: u.email,
+            displayName: u.displayName || '',
+            creationTime: u.metadata?.creationTime || '',
+            isOwner: String(u.email || '').toLowerCase() === OWNER_EMAIL
+          }));
+        } catch {
+          // If auth.listUsers fails (e.g. Identity Toolkit not enabled)
+        }
+
+        const map = new Map<string, any>();
+        // Add auth users
+        authUsers.forEach((u) => {
+          if (u.email) map.set(u.email.toLowerCase(), u);
+        });
+
+        // Add db admins
+        dbAdmins.forEach((u) => {
+          if (u.email && !map.has(u.email.toLowerCase())) {
+            map.set(u.email.toLowerCase(), {
+              uid: u.uid || `db-${u.email}`,
+              email: u.email,
+              displayName: u.displayName || 'مسؤول متجر',
+              creationTime: u.creationTime || '',
+              isOwner: String(u.email || '').toLowerCase() === OWNER_EMAIL
+            });
+          }
+        });
+
+        // Add memory admins
+        Array.from(ADMIN_EMAILS).forEach((email, idx) => {
+          const lower = email.toLowerCase();
+          if (!map.has(lower)) {
+            map.set(lower, {
+              uid: `admin-${idx}`,
+              email: lower,
+              displayName: 'مسؤول المتجر',
+              creationTime: '',
+              isOwner: lower === OWNER_EMAIL
+            });
+          }
+        });
+
+        res.json({ success: true, users: Array.from(map.values()) });
+      } catch (err: any) {
+        res.json({
+          success: true,
+          users: [{ uid: 'admin-0', email: OWNER_EMAIL, displayName: 'المالك الرئيسي', isOwner: true }]
+        });
       }
     })
   );
@@ -1274,20 +1325,29 @@ export function createApp(getDeps: () => Deps) {
       if (!email || !password) throw new HttpError(400, 'البريد وكلمة المرور مطلوبان');
       if (password.length < 6) throw new HttpError(400, 'كلمة المرور لا تقل عن 6 أحرف');
 
+      let newUid = `admin-${Date.now()}`;
       try {
         const user = await deps.auth.createUser({ email, password, displayName });
+        newUid = user.uid;
         await deps.auth.setCustomUserClaims(user.uid, { admin: true });
-        res.status(201).json({ success: true, user: { uid: user.uid, email: user.email, displayName: user.displayName } });
-      } catch (err: any) {
-        if (err instanceof HttpError) throw err;
-        const msg =
-          err?.code === 'auth/email-already-exists'
-            ? 'البريد مستخدم بالفعل'
-            : err?.code === 'auth/invalid-email'
-            ? 'البريد غير صالح'
-            : 'فشل إنشاء الحساب';
-        throw new HttpError(400, msg);
+      } catch (authErr: any) {
+        console.warn('Auth user creation warning:', authErr?.message || authErr);
       }
+
+      ADMIN_EMAILS.add(email);
+
+      // Persist to Firestore settings/admins
+      try {
+        const ref = deps.db.collection('settings').doc('admins');
+        const snap = await ref.get();
+        const currentList: any[] = snap.exists ? snap.data()?.list || [] : [];
+        if (!currentList.some((a) => a.email === email)) {
+          currentList.push({ uid: newUid, email, displayName, creationTime: new Date().toISOString() });
+          await ref.set({ list: currentList });
+        }
+      } catch {}
+
+      res.status(201).json({ success: true, user: { uid: newUid, email, displayName } });
     })
   );
 
@@ -1295,31 +1355,47 @@ export function createApp(getDeps: () => Deps) {
     '/api/admin/delete-user',
     requireAdmin(async (req, res, deps) => {
       const uid = str(req.body?.uid, 128);
-      if (!uid) throw new HttpError(400, 'المعرف مطلوب');
+      const email = String(req.body?.email || '').trim().toLowerCase();
+      const callerUser = (req as any).adminUser || {};
+      const callerEmail = String(callerUser.email || '').trim().toLowerCase();
 
-      // If it's a simulated or fallback admin uid (e.g. admin-0)
-      if (uid.startsWith('admin-')) {
-        res.json({ success: true, message: 'تم حذف الحساب بنجاح' });
-        return;
+      if (!uid && !email) throw new HttpError(400, 'المعرف أو البريد مطلوب');
+
+      // Prevent user from deleting their own current active session
+      if (email && callerEmail && email === callerEmail) {
+        throw new HttpError(403, 'لا يمكنك حذف حسابك الشخصي أثناء تسجيل الدخول به');
       }
 
+      // Remove from in-memory set
+      if (email) {
+        ADMIN_EMAILS.delete(email);
+      }
+
+      // Try deleting from Firebase Auth if possible
+      if (uid && !uid.startsWith('admin-') && !uid.startsWith('db-')) {
+        try {
+          await deps.auth.deleteUser(uid);
+        } catch (err: any) {
+          console.warn('[delete-user] Firebase Auth deleteUser note:', err?.message || err);
+        }
+      }
+
+      // Remove from Firestore settings/admins document
       try {
-        const target = await deps.auth.getUser(uid);
-        if (String(target.email || '').toLowerCase() === OWNER_EMAIL) {
-          throw new HttpError(403, 'لا يمكن حذف حساب المالك الرئيسي');
+        const ref = deps.db.collection('settings').doc('admins');
+        const snap = await ref.get();
+        if (snap.exists) {
+          const list = snap.data()?.list || [];
+          const updated = list.filter((a: any) => {
+            if (uid && a.uid === uid) return false;
+            if (email && a.email?.toLowerCase() === email) return false;
+            return true;
+          });
+          await ref.set({ list: updated });
         }
-        await deps.auth.deleteUser(uid);
-        res.json({ success: true, message: 'تم حذف الحساب بنجاح' });
-      } catch (err: any) {
-        if (err instanceof HttpError) throw err;
-        console.warn('[delete-user] Auth admin API error:', err?.message || err);
-        // If user already deleted or missing from auth provider, or identitytoolkit API disabled
-        if (err?.code === 'auth/user-not-found' || err?.code === 'auth/internal-error' || err?.status === 403) {
-          res.json({ success: true, message: 'تم حذف الحساب من النظام' });
-          return;
-        }
-        throw new HttpError(400, err?.message || 'تعذر حذف الحساب حالياً');
-      }
+      } catch {}
+
+      res.json({ success: true, message: 'تم حذف حساب المسؤول وإلغاء صلاحياته بنجاح' });
     })
   );
 

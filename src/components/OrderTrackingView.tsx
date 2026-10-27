@@ -75,7 +75,9 @@ export const OrderTrackingView: React.FC = () => {
 
   React.useEffect(() => {
     try {
-      const savedQuery = localStorage.getItem('beyond_last_track_query');
+      const savedQuery =
+        localStorage.getItem('yozora_last_track_query') ||
+        localStorage.getItem('beyond_last_track_query');
       if (savedQuery && savedQuery.trim()) {
         const q = savedQuery.trim().toLowerCase();
         setSearchInput(savedQuery.trim());
@@ -90,6 +92,7 @@ export const OrderTrackingView: React.FC = () => {
               setRemoteResults(res);
               if (!res || res.length === 0) {
                 try {
+                  localStorage.removeItem('yozora_last_track_query');
                   localStorage.removeItem('beyond_last_track_query');
                 } catch {}
                 setSearchInput('');

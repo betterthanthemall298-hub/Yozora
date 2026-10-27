@@ -10,9 +10,15 @@ import {
   FileText,
   ArrowRight,
   Building2,
-  CheckCircle2
+  CheckCircle2,
+  Copy,
+  Check,
+  MessageCircle,
+  Sparkles,
+  ShoppingBag
 } from 'lucide-react';
 import { OrderItem, Order } from '../types';
+import { playPurchaseSuccessSound, triggerSuccessVibration } from '../utils/soundEffects';
 
 export const CheckoutModal: React.FC = () => {
   const {
@@ -24,7 +30,9 @@ export const CheckoutModal: React.FC = () => {
     getCartSubtotal,
     getCartDiscount,
     createOrder,
-    settings
+    settings,
+    setActiveView,
+    addToast
   } = useStore();
 
   const [customerName, setCustomerName] = useState('');
@@ -37,6 +45,7 @@ export const CheckoutModal: React.FC = () => {
   const [phoneError, setPhoneError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
+  const [copiedOrder, setCopiedOrder] = useState(false);
 
   if (!isCheckoutOpen) return null;
 
@@ -130,11 +139,37 @@ export const CheckoutModal: React.FC = () => {
         total: grandTotal
       });
 
-      // Show small confirmation message
-      setConfirmedOrder(newOrder);
+      // 1. Play immediate celebratory sound chime & haptic
+      playPurchaseSuccessSound();
+      triggerSuccessVibration();
+
+      // 2. Dispatch in-store custom notification event
       try {
+        window.dispatchEvent(
+          new CustomEvent('yozora:order-completed', {
+            detail: {
+              orderNumber: newOrder.orderNumber,
+              total: newOrder.total,
+              customerName: newOrder.customerName
+            }
+          })
+        );
+      } catch {}
+
+      // 3. Trigger immediate storewide toast notification
+      addToast({
+        type: 'success',
+        title: 'تم تأكيد طلبك بنجاح! 🎉',
+        description: `رقم الطلب #${newOrder.orderNumber} بقيمة ${newOrder.total.toLocaleString()} ج.م - جاري تجهيز الشحنة.`
+      });
+
+      // 4. Save to local device storage for tracking
+      try {
+        localStorage.setItem('yozora_last_track_query', newOrder.orderNumber);
         localStorage.setItem('beyond_last_track_query', newOrder.orderNumber);
       } catch {}
+
+      setConfirmedOrder(newOrder);
     } catch (err: any) {
       console.error('Failed to submit order:', err);
       alert(err?.message || 'فشل إرسال الطلب، يرجى المحاولة مرة أخرى.');
@@ -143,42 +178,160 @@ export const CheckoutModal: React.FC = () => {
     }
   };
 
-  // Small confirmation message popup
+  // Rich Instant Order Confirmation Modal
   if (confirmedOrder) {
+    const rawWaNumber = settings.whatsappNumber || '01000000000';
+    const cleanWaDigits = rawWaNumber.replace(/[^0-9]/g, '');
+    const waPhone = cleanWaDigits.startsWith('20')
+      ? cleanWaDigits
+      : '20' + cleanWaDigits.replace(/^0+/, '');
+    const waText = encodeURIComponent(
+      `مرحباً Yozora! قمت بعمل طلب جديد برقم #${confirmedOrder.orderNumber} باسم ${confirmedOrder.customerName}. أود تأكيد الطلب للشحن.`
+    );
+    const totalPiecesCount = (confirmedOrder.items || []).reduce(
+      (sum, it) => sum + (Number(it.quantity) || 1),
+      0
+    );
+
+    const handleCopyOrderNumber = () => {
+      try {
+        navigator.clipboard.writeText(confirmedOrder.orderNumber);
+        setCopiedOrder(true);
+        setTimeout(() => setCopiedOrder(false), 2500);
+      } catch {}
+    };
+
     return (
-      <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+      <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
         <div
-          id="order-confirmed-small-card"
-          className="w-full max-w-xs bg-stone-900 border border-stone-800 rounded-2xl shadow-2xl p-6 text-center space-y-4 relative animate-in zoom-in-95 duration-200"
+          id="order-confirmed-rich-modal"
+          className="w-full max-w-md bg-stone-900 border border-stone-800 rounded-3xl shadow-2xl p-6 sm:p-7 text-center space-y-5 relative animate-in zoom-in-95 duration-200"
         >
           <button
-            id="close-confirmed-small-x-btn"
+            id="close-confirmed-x-btn"
             type="button"
             onClick={handleClose}
-            className="text-stone-400 hover:text-stone-200 p-1.5 rounded-lg hover:bg-stone-800 transition-colors absolute top-3 left-3"
+            className="text-stone-400 hover:text-stone-200 p-2 rounded-xl hover:bg-stone-800 transition-colors absolute top-4 left-4"
             title="إغلاق"
           >
             <X className="w-4 h-4" />
           </button>
-          <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-950/40">
-            <CheckCircle2 className="w-8 h-8" />
+
+          {/* Celebratory Icon */}
+          <div className="relative mx-auto w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping duration-1000 opacity-75" />
+            <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-emerald-600 to-emerald-400 border-2 border-emerald-300/40 flex items-center justify-center text-stone-950 shadow-xl shadow-emerald-950/60">
+              <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 stroke-[2.5]" />
+            </div>
           </div>
-          <div className="space-y-1">
-            <h3 className="text-lg font-black text-stone-100">
+
+          {/* Header */}
+          <div className="space-y-1.5">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <Sparkles className="w-3 h-3" />
+              <span>إشعار فوري: تم تسجيل الطلب في النظام</span>
+            </span>
+            <h3 className="text-xl sm:text-2xl font-black text-stone-100">
               تم استلام طلبك بنجاح!
             </h3>
-            <p className="text-xs text-amber-400 font-mono font-bold">
-              #{confirmedOrder.orderNumber}
+            <p className="text-xs text-stone-400 leading-relaxed max-w-xs mx-auto">
+              شكراً لاختيارك <strong className="text-amber-400 font-bold">{settings.storeName || 'Yozora'}</strong>. تم حفظ تفاصيل طلبك وجاري البدء في تجهيزه فوراً.
             </p>
           </div>
-          <button
-            id="close-confirmed-order-small-btn"
-            type="button"
-            onClick={handleClose}
-            className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-black font-bold text-xs transition-colors shadow-md shadow-amber-950/30"
-          >
-            تم
-          </button>
+
+          {/* Order Number Banner & Copy */}
+          <div className="p-3.5 bg-stone-950/90 border border-stone-800 rounded-2xl flex items-center justify-between gap-3">
+            <div className="text-right">
+              <span className="text-[10px] text-stone-500 block">رقم الطلب الخاص بك</span>
+              <span className="text-lg font-black font-mono text-amber-400 tracking-wider">
+                #{confirmedOrder.orderNumber}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleCopyOrderNumber}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+                copiedOrder
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                  : 'bg-stone-900 hover:bg-stone-800 text-stone-300 border-stone-700'
+              }`}
+            >
+              {copiedOrder ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>تم النسخ!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>نسخ الرقم</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Order Key Specs */}
+          <div className="grid grid-cols-2 gap-2.5 text-xs text-right">
+            <div className="p-3 bg-stone-950/60 border border-stone-800/80 rounded-xl">
+              <span className="text-[10px] text-stone-500 block mb-0.5">المبلغ عند الاستلام</span>
+              <span className="text-sm font-black font-mono text-stone-100">
+                {confirmedOrder.total.toLocaleString()} ج.م
+              </span>
+            </div>
+            <div className="p-3 bg-stone-950/60 border border-stone-800/80 rounded-xl">
+              <span className="text-[10px] text-stone-500 block mb-0.5">مكان التوصيل</span>
+              <span className="text-xs font-bold text-stone-200 truncate block">
+                {confirmedOrder.governorate}
+              </span>
+            </div>
+            <div className="p-3 bg-stone-950/60 border border-stone-800/80 rounded-xl">
+              <span className="text-[10px] text-stone-500 block mb-0.5">عدد القطع</span>
+              <span className="text-xs font-bold text-stone-200">
+                {totalPiecesCount} قطعة هودي
+              </span>
+            </div>
+            <div className="p-3 bg-stone-950/60 border border-stone-800/80 rounded-xl">
+              <span className="text-[10px] text-stone-500 block mb-0.5">مدة التوصيل</span>
+              <span className="text-xs font-bold text-amber-400">
+                2 - 3 أيام عمل
+              </span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="space-y-2 pt-1">
+            <a
+              href={`https://wa.me/${waPhone}?text=${waText}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-950/40"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>تأكيد الطلب عبر واتساب فوراً</span>
+            </a>
+
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  handleClose();
+                  setActiveView('tracking');
+                }}
+                className="w-full py-2.5 px-3 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors border border-stone-700"
+              >
+                <Truck className="w-3.5 h-3.5 text-amber-400" />
+                <span>تتبع الشحنة</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleClose}
+                className="w-full py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-stone-950 font-black text-xs transition-colors shadow-md shadow-amber-950/30"
+              >
+                <span>متابعة التسوق</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );

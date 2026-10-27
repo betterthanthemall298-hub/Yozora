@@ -55,24 +55,7 @@ export async function shareToInstagram(product: Product): Promise<void> {
   window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
 }
 
-/**
- * Share directly on Telegram (kept for compatibility).
- */
-export function shareToTelegram(product: Product): void {
-  const url = getProductShareUrl(product.id);
-  const text = getShortMarketingText(product);
-  const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
-  window.open(telegramUrl, '_blank', 'noopener,noreferrer');
-}
 
-/**
- * Share on Facebook.
- */
-export function shareToFacebook(product: Product): void {
-  const url = getProductShareUrl(product.id);
-  const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-  window.open(fbUrl, '_blank', 'noopener,noreferrer');
-}
 
 /**
  * Share on X (Twitter).

@@ -130,7 +130,7 @@ export interface StoreSettings {
   whatsappUrl: string;
   instagramUrl: string;
   tiktokUrl: string;
-  facebookUrl: string;
+  facebookUrl?: string;
   freeShippingThreshold: number;
   quantityShippingEnabled?: boolean;
   quantityShippingMinItems?: number;
@@ -139,8 +139,6 @@ export interface StoreSettings {
   comingSoonTitle?: string;
   comingSoonSubtitle?: string;
   pushNotificationTopic?: string;
-  telegramBotToken?: string;
-  telegramChatId?: string;
 }
 
 export interface AdminCredentials {

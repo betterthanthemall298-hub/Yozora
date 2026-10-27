@@ -189,3 +189,11 @@ test('products group into designated sections with fallback to default section',
   assert.deepEqual(customList, ['p2']);
 });
 
+test('sound effects execute safely in headless Node environment without throwing', async () => {
+  const { playPurchaseSuccessSound, triggerSuccessVibration } = await import('./soundEffects');
+  assert.doesNotThrow(() => {
+    playPurchaseSuccessSound();
+    triggerSuccessVibration();
+  });
+});
+

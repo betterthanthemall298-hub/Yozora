@@ -13,7 +13,6 @@ import {
 import {
   shareToWhatsApp,
   shareToInstagram,
-  shareToFacebook,
   shareToTwitter,
   canNativeShare,
   shareNative,
@@ -224,25 +223,16 @@ export const ProductShareModal: React.FC = () => {
               </button>
             )}
 
-            {/* Quick social shortcuts (Facebook, X) */}
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <button
-                id="share-facebook-btn"
-                type="button"
-                onClick={() => shareToFacebook(product)}
-                className="py-2.5 px-3 rounded-xl bg-stone-950 hover:bg-stone-800 border border-stone-800 hover:border-stone-700 text-stone-300 hover:text-white text-xs font-bold flex items-center justify-center gap-2 transition-all"
-              >
-                <Share2 className="w-3.5 h-3.5 text-blue-400" />
-                <span>فيسبوك (Facebook)</span>
-              </button>
+            {/* Quick social shortcuts (X) */}
+            <div className="pt-1">
               <button
                 id="share-twitter-btn"
                 type="button"
                 onClick={() => shareToTwitter(product)}
-                className="py-2.5 px-3 rounded-xl bg-stone-950 hover:bg-stone-800 border border-stone-800 hover:border-stone-700 text-stone-300 hover:text-white text-xs font-bold flex items-center justify-center gap-2 transition-all"
+                className="w-full py-2.5 px-3 rounded-xl bg-stone-950 hover:bg-stone-800 border border-stone-800 hover:border-stone-700 text-stone-300 hover:text-white text-xs font-bold flex items-center justify-center gap-2 transition-all"
               >
                 <Share2 className="w-3.5 h-3.5 text-stone-300" />
-                <span>منصة X (تويتر)</span>
+                <span>مشاركة عبر منصة X (تويتر)</span>
               </button>
             </div>
           </div>

@@ -96,18 +96,14 @@ export const ProductGrid: React.FC = () => {
             <span>الأقسام:</span>
           </span>
           {activeSections.map((sec, idx) => {
-            const count = sectionProductsMap.get(sec.id)?.length || 0;
             return (
               <button
                 key={sec.id}
                 type="button"
                 onClick={() => scrollToSection(sec.id)}
-                className="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 bg-stone-900 border border-stone-800 text-stone-200 hover:border-amber-500/50 hover:text-amber-400 active:scale-95"
+                className="px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 bg-stone-900 border border-stone-800 text-stone-200 hover:border-amber-500/50 hover:text-amber-400 active:scale-95"
               >
                 <span>{sec.name}</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-stone-800 text-stone-400">
-                  {count}
-                </span>
                 {idx === 0 && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
               </button>
             );
@@ -162,7 +158,6 @@ export const ProductGrid: React.FC = () => {
         <div className="space-y-16 sm:space-y-20">
           {activeSections.map((section, index) => {
             const sectionProducts = sectionProductsMap.get(section.id) || [];
-            const isFirst = index === 0;
 
             return (
               <section
@@ -173,28 +168,12 @@ export const ProductGrid: React.FC = () => {
                 {/* Section Header */}
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-8">
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-                          isFirst
-                            ? 'bg-amber-500/15 border border-amber-500/40 text-amber-400'
-                            : 'bg-emerald-500/15 border border-emerald-500/40 text-emerald-400'
-                        }`}
-                      >
-                        <Sparkles className="w-3.5 h-3.5" />
-                        {section.badge || (isFirst ? 'جاهز للشحن' : 'إصدار حصري')}
-                      </span>
-                      <span className="text-xs font-bold text-stone-400">
-                        ({sectionProducts.length} {sectionProducts.length === 1 ? 'قطعة' : 'قطع'})
-                      </span>
-                    </div>
-
                     <h2 className="text-2xl sm:text-3xl font-black text-stone-100 tracking-tight flex items-center gap-3">
                       <span>{section.name}</span>
                     </h2>
 
                     {section.subtitle && (
-                      <p className="text-xs sm:text-sm text-stone-400 mt-1.5 max-w-2xl leading-relaxed">
+                      <p className="text-xs sm:text-sm text-stone-400 mt-2 max-w-2xl leading-relaxed">
                         {section.subtitle}
                       </p>
                     )}

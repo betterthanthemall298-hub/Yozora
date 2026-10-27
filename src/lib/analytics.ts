@@ -92,17 +92,17 @@ export async function trackVisit(): Promise<void> {
 
   // 3-minute throttle per tab to avoid inflating on rapid page clicks,
   // but ensures repeat visits across sessions are counted.
-  const lastVisit = sessionStorage.getItem('beyond_last_visit_ts');
+  const lastVisit = sessionStorage.getItem('yozora_last_visit_ts');
   if (lastVisit && nowMs - Number(lastVisit) < 3 * 60 * 1000) {
     return;
   }
-  sessionStorage.setItem('beyond_last_visit_ts', String(nowMs));
+  sessionStorage.setItem('yozora_last_visit_ts', String(nowMs));
 
   // Determine unique visitor today
   let isUniqueToday = false;
   try {
-    if (!localStorage.getItem(`beyond_unique_${today}`)) {
-      localStorage.setItem(`beyond_unique_${today}`, '1');
+    if (!localStorage.getItem(`yozora_unique_${today}`)) {
+      localStorage.setItem(`yozora_unique_${today}`, '1');
       isUniqueToday = true;
     }
   } catch {
@@ -164,7 +164,7 @@ export async function trackAddToCart(item: { productId: string; productName: str
       [`hourlyCartAdds.${hour}`]: increment(1)
     };
     if (item.productId) {
-      shardPatch[`topProducts.${item.productId}.name`] = item.productName || 'هودي بيوند';
+      shardPatch[`topProducts.${item.productId}.name`] = item.productName || 'هودي يوزورا';
       shardPatch[`topProducts.${item.productId}.count`] = increment(1);
     }
     setDoc(shardRef, shardPatch, { merge: true }).catch(() => {});
@@ -466,7 +466,7 @@ export async function getAnalyticsSummary(
   const productSalesCount: Record<string, { name: string; sales: number }> = {};
   periodOrders.forEach((o) => {
     o.items?.forEach((it) => {
-      const pName = it.productName || 'هودي بيوند';
+      const pName = it.productName || 'هودي يوزورا';
       if (!productSalesCount[pName]) productSalesCount[pName] = { name: pName, sales: 0 };
       productSalesCount[pName].sales += it.quantity || 1;
     });

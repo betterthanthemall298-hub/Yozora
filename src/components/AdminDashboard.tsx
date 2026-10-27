@@ -18,7 +18,6 @@ import {
   Image as ImageIcon,
   X,
   Instagram,
-  Facebook,
   Pencil,
   Palette,
   Search,
@@ -258,10 +257,7 @@ export const AdminDashboard: React.FC = () => {
   const [whatsappUrl, setWhatsappUrl] = useState(settings.whatsappUrl || '');
   const [instagramUrl, setInstagramUrl] = useState(settings.instagramUrl || '');
   const [tiktokUrl, setTiktokUrl] = useState(settings.tiktokUrl || '');
-  const [facebookUrl, setFacebookUrl] = useState(settings.facebookUrl || '');
   const [pushTopic, setPushTopicState] = useState(settings.pushNotificationTopic || getPushTopic());
-  const [telegramBotToken, setTelegramBotToken] = useState(settings.telegramBotToken || '');
-  const [telegramChatId, setTelegramChatId] = useState(settings.telegramChatId || '');
   const [isSendingTestPush, setIsSendingTestPush] = useState(false);
   const [testPushMessage, setTestPushMessage] = useState('');
 
@@ -294,7 +290,6 @@ export const AdminDashboard: React.FC = () => {
     setWhatsappUrl(settings.whatsappUrl || '');
     setInstagramUrl(settings.instagramUrl || '');
     setTiktokUrl(settings.tiktokUrl || '');
-    setFacebookUrl(settings.facebookUrl || '');
     setQuantityShippingEnabled(Boolean(settings.quantityShippingEnabled));
     setQuantityShippingMinItems(String(settings.quantityShippingMinItems ?? 2));
     setQuantityShippingCost(String(settings.quantityShippingCost ?? 0));
@@ -308,8 +303,6 @@ export const AdminDashboard: React.FC = () => {
         const snap = await getDoc(doc(db, 'private_settings', 'notifications'));
         if (snap.exists()) {
           const data = snap.data();
-          if (data?.telegramBotToken) setTelegramBotToken(data.telegramBotToken);
-          if (data?.telegramChatId) setTelegramChatId(data.telegramChatId);
           if (data?.pushNotificationTopic) setPushTopicState(data.pushNotificationTopic);
         }
       } catch (err) {
@@ -379,14 +372,14 @@ export const AdminDashboard: React.FC = () => {
   const handleDeleteAdminPrompt = (uid: string, email: string) => {
     openDeleteModal({
       title: 'حذف مسؤول من الفريق',
-      description: 'سيتم حذف حساب هذا المسؤول من Firebase Auth.',
+      description: 'سيتم حذف حساب هذا المسؤول وإلغاء صلاحياته نهائياً.',
       itemLabel: `البريد: ${email}`,
       onConfirm: async () => {
         try {
           const res = await authFetch('/api/admin/delete-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ uid })
+            body: JSON.stringify({ uid, email })
           });
           const data = await res.json();
           if (!res.ok || !data.success) {
@@ -845,10 +838,8 @@ export const AdminDashboard: React.FC = () => {
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanLogo = brandLogo.trim() || '/beyond-logo.jpg';
+    const cleanLogo = brandLogo.trim() || '/icon-192.png';
     const cleanTopic = pushTopic.trim();
-    const cleanToken = telegramBotToken.trim();
-    const cleanChatId = telegramChatId.trim();
 
     setIsSavingSettings(true);
     try {
@@ -864,13 +855,10 @@ export const AdminDashboard: React.FC = () => {
         whatsappUrl,
         instagramUrl,
         tiktokUrl,
-        facebookUrl,
         quantityShippingEnabled,
         quantityShippingMinItems: Math.max(1, Number(quantityShippingMinItems) || 2),
         quantityShippingCost: Math.max(0, Number(quantityShippingCost) || 0),
-        pushNotificationTopic: cleanTopic,
-        telegramBotToken: cleanToken,
-        telegramChatId: cleanChatId
+        pushNotificationTopic: cleanTopic
       });
       if (cleanTopic) {
         setPushTopic(cleanTopic);
@@ -1267,18 +1255,6 @@ export const AdminDashboard: React.FC = () => {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs text-stone-400 mb-1">القصة والموديل</label>
-                  <select
-                    value={pCategory}
-                    onChange={(e) => setPCategory(e.target.value as HoodieCategory)}
-                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100"
-                  >
-                    <option value="oversized">أوفر سايز (Oversized)</option>
-                    <option value="basic">بيزك كلاسيك (Basic)</option>
-                    <option value="zipup">سوستة كاملة (Zip-Up)</option>
-                  </select>
-                </div>
 
                 <div>
                   <label className="block text-xs font-bold text-amber-400 mb-1 flex items-center justify-between">
@@ -1763,7 +1739,7 @@ export const AdminDashboard: React.FC = () => {
                           </td>
                           <td className="p-3.5">
                             <span className="px-2 py-0.5 rounded-md bg-stone-950 border border-stone-800 text-stone-300 text-[11px]">
-                              {p.category}
+                              {p.fit || p.category || 'أوفر سايز'}
                             </span>
                           </td>
                           <td className="p-3.5 font-mono font-bold text-amber-400">
@@ -3508,21 +3484,6 @@ export const AdminDashboard: React.FC = () => {
                   className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 focus:border-amber-500"
                 />
               </div>
-
-              <div>
-                <label className="block text-xs text-stone-300 mb-1 flex items-center gap-1.5">
-                  <Facebook className="w-3.5 h-3.5 text-blue-400" />
-                  <span>رابط فيسبوك (Facebook URL)</span>
-                </label>
-                <input
-                  id="settings-facebook-input"
-                  type="url"
-                  placeholder="https://facebook.com/your_page"
-                  value={facebookUrl}
-                  onChange={(e) => setFacebookUrl(e.target.value)}
-                  className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 focus:border-amber-500"
-                />
-              </div>
             </div>
 
             {/* Mobile Push & Lock-Screen Notifications Configuration */}
@@ -3542,7 +3503,7 @@ export const AdminDashboard: React.FC = () => {
                 <input
                   id="settings-push-topic-input"
                   type="text"
-                  placeholder="beyond_orders_alerts"
+                  placeholder="yozora_orders_alerts"
                   value={pushTopic}
                   onChange={(e) => setPushTopicState(e.target.value)}
                   className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-amber-400 font-mono focus:border-amber-500"
@@ -3551,38 +3512,6 @@ export const AdminDashboard: React.FC = () => {
                 <p className="text-[10px] text-stone-500 mt-1">
                   يمكنك الاشتراك في هذا الاسم من تطبيق ntfy على آيفون أو أندرويد لتصلك رنة عالية فور كل طلب.
                 </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                <div>
-                  <label className="block text-xs text-stone-300 mb-1 flex items-center gap-1.5">
-                    <Send className="w-3.5 h-3.5 text-sky-400" />
-                    <span>Telegram Bot Token (اختياري)</span>
-                  </label>
-                  <input
-                    id="settings-telegram-token-input"
-                    type="text"
-                    placeholder="مثال: 123456789:ABCdef..."
-                    value={telegramBotToken}
-                    onChange={(e) => setTelegramBotToken(e.target.value)}
-                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 font-mono focus:border-amber-500"
-                    dir="ltr"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-stone-300 mb-1 flex items-center gap-1.5">
-                    <span>Telegram Chat ID (اختياري)</span>
-                  </label>
-                  <input
-                    id="settings-telegram-chatid-input"
-                    type="text"
-                    placeholder="مثال: 987654321"
-                    value={telegramChatId}
-                    onChange={(e) => setTelegramChatId(e.target.value)}
-                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 font-mono focus:border-amber-500"
-                    dir="ltr"
-                  />
-                </div>
               </div>
             </div>
           </div>
@@ -3655,7 +3584,11 @@ export const AdminDashboard: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {adminUsers.map((u) => {
-                  const isOwner = u.isOwner;
+                  const emailLower = (u.email || '').toLowerCase().trim();
+                  const currentLower = (adminCredentials.username || '').toLowerCase().trim();
+                  const isPrimaryOwner = emailLower === 'betterthanthemall298@gmail.com';
+                  const isCurrentLoggedIn = emailLower === currentLower;
+                  const canDelete = !isCurrentLoggedIn;
                   return (
                     <div
                       key={u.uid}
@@ -3666,7 +3599,7 @@ export const AdminDashboard: React.FC = () => {
                           <span className="font-bold text-xs text-stone-100 truncate">
                             {u.displayName || 'مسؤول متجر'}
                           </span>
-                          {isOwner ? (
+                          {isPrimaryOwner ? (
                             <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-bold shrink-0">
                               المالك الرئيسي
                             </span>
@@ -3687,7 +3620,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
 
                       <div className="flex items-center justify-end pt-2 border-t border-stone-900 text-[11px]">
-                        {!isOwner && (
+                        {canDelete ? (
                           <button
                             type="button"
                             onClick={() => handleDeleteAdminPrompt(u.uid, u.email)}
@@ -3696,6 +3629,10 @@ export const AdminDashboard: React.FC = () => {
                             <Trash2 className="w-3.5 h-3.5" />
                             <span>حذف المسؤول</span>
                           </button>
+                        ) : (
+                          <span className="text-[10px] text-stone-500 italic">
+                            حسابك الحالي النشط
+                          </span>
                         )}
                       </div>
                     </div>
@@ -3967,20 +3904,6 @@ export const AdminDashboard: React.FC = () => {
                     onChange={(e) => setEditOriginalPrice(e.target.value === '' ? '' : Number(e.target.value))}
                     className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 font-mono focus:outline-none focus:border-amber-500"
                   />
-                </div>
-
-                {/* Category */}
-                <div>
-                  <label className="block text-xs text-stone-300 font-medium mb-1">القصة والموديل</label>
-                  <select
-                    value={editCategory}
-                    onChange={(e) => setEditCategory(e.target.value as HoodieCategory)}
-                    className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-100 focus:outline-none focus:border-amber-500"
-                  >
-                    <option value="oversized">أوفر سايز (Oversized)</option>
-                    <option value="basic">بيزك كلاسيك (Basic)</option>
-                    <option value="zipup">سوستة كاملة (Zip-Up)</option>
-                  </select>
                 </div>
 
                 {/* Section Assignment */}

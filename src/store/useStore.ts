@@ -239,6 +239,10 @@ function loadLocalDeviceData() {
     delete (parsedSettings as any).telegramChatId;
     delete (parsedSettings as any).pushNotificationTopic;
 
+    const cachedProducts = Array.isArray(parsed.products) && parsed.products.length > 0
+      ? parsed.products
+      : INITIAL_PRODUCTS;
+
     return {
       ...defaults,
       cart: Array.isArray(parsed.cart) ? parsed.cart : [],
@@ -246,6 +250,7 @@ function loadLocalDeviceData() {
       activeView: (parsed.activeView === 'admin' ? 'admin' : 'home') as ActiveView,
       settings: parsedSettings,
       sections: Array.isArray(parsed.sections) && parsed.sections.length > 0 ? parsed.sections : INITIAL_SECTIONS,
+      products: cachedProducts,
       governorates: normalizeGovernorates(parsed.governorates)
     };
   } catch (e) {
@@ -269,7 +274,12 @@ function saveLocalDeviceData(s: StoreState) {
       wishlist: s.wishlist,
       activeView: s.activeView === 'admin' ? 'admin' : 'home',
       settings: s.settings,
-      governorates: s.governorates
+      governorates: s.governorates,
+      sections: s.sections,
+      products: (s.products || []).slice(0, 40).map((p) => ({
+        ...p,
+        images: (p.images || []).filter((i) => !i.startsWith('data:')).slice(0, 2)
+      }))
     };
     localStorage.setItem(STORAGE_KEY_V5, JSON.stringify(dataToSave));
   } catch (e) {
@@ -1294,17 +1304,11 @@ let state: StoreState = {
   // Store Settings
   settings: localDeviceData.settings,
   updateSettings: async (updates) => {
-    const { telegramBotToken, telegramChatId, pushNotificationTopic, ...publicSettings } = updates;
+    const { pushNotificationTopic, ...publicSettings } = updates as any;
     try {
-      if (
-        telegramBotToken !== undefined ||
-        telegramChatId !== undefined ||
-        pushNotificationTopic !== undefined
-      ) {
+      if (pushNotificationTopic !== undefined) {
         const privatePayload: Record<string, any> = {};
-        if (telegramBotToken !== undefined) privatePayload.telegramBotToken = telegramBotToken;
-        if (telegramChatId !== undefined) privatePayload.telegramChatId = telegramChatId;
-        if (pushNotificationTopic !== undefined) privatePayload.pushNotificationTopic = pushNotificationTopic;
+        privatePayload.pushNotificationTopic = pushNotificationTopic;
         await setDoc(doc(db, 'private_settings', 'notifications'), sanitizeForFirestore(privatePayload), { merge: true });
       }
       const generalPayload: Record<string, any> = { ...sanitizeForFirestore(publicSettings) };

@@ -451,27 +451,35 @@ export const AdminCustomerAnalytics: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-800/60">
-                {data?.topProductsStats.map((prod, idx) => (
-                  <tr key={idx} className="hover:bg-stone-800/30 transition-colors">
-                    <td className="py-3 font-semibold text-stone-200 flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-stone-800 text-stone-400 flex items-center justify-center text-[10px] font-mono">
-                        {idx + 1}
-                      </span>
-                      <span>{prod.name}</span>
-                    </td>
-                    <td className="py-3 text-center font-mono text-amber-400 font-bold">
-                      {prod.addCount}
-                    </td>
-                    <td className="py-3 text-center font-mono text-emerald-400 font-bold">
-                      {prod.salesCount}
-                    </td>
-                    <td className="py-3 text-center">
-                      <span className="px-2 py-0.5 rounded-full bg-stone-800 text-stone-300 font-mono text-[10px] font-bold">
-                        {prod.conversionRate}%
-                      </span>
+                {!data || !data.topProductsStats || data.topProductsStats.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-8 text-center text-stone-500">
+                      لا توجد بيانات تفاعلات أو مبيعات مسجلة في هذه الفترة بعد.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  data.topProductsStats.map((prod, idx) => (
+                    <tr key={idx} className="hover:bg-stone-800/30 transition-colors">
+                      <td className="py-3 font-semibold text-stone-200 flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-stone-800 text-stone-400 flex items-center justify-center text-[10px] font-mono">
+                          {idx + 1}
+                        </span>
+                        <span>{prod.name}</span>
+                      </td>
+                      <td className="py-3 text-center font-mono text-amber-400 font-bold">
+                        {prod.addCount}
+                      </td>
+                      <td className="py-3 text-center font-mono text-emerald-400 font-bold">
+                        {prod.salesCount}
+                      </td>
+                      <td className="py-3 text-center">
+                        <span className="px-2 py-0.5 rounded-full bg-stone-800 text-stone-300 font-mono text-[10px] font-bold">
+                          {prod.conversionRate}%
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

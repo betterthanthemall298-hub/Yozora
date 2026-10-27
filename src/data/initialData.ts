@@ -12,8 +12,7 @@ export const INITIAL_SECTIONS: StoreSection[] = [
   {
     id: 'ready_prints',
     name: 'الطبعات الجاهزة',
-    subtitle: 'تصاميم فاخرة جاهزة للشحن الفوري بأعلى دقة طباعة وثبات للألوان',
-    badge: 'شحن فوري',
+    subtitle: 'تصاميم فاخرة مجهزة بأعلى دقة طباعة وثبات للألوان',
     order: 0,
     active: true,
     createdAt: '2026-01-01'
@@ -22,7 +21,6 @@ export const INITIAL_SECTIONS: StoreSection[] = [
     id: 'custom_prints',
     name: 'الطبعات الخاصة',
     subtitle: 'قطع مميزة وتصاميم حصرية مخصصة لأصحاب الذوق الفريد',
-    badge: 'إصدار حصري',
     order: 1,
     active: true,
     createdAt: '2026-01-01'
@@ -113,7 +111,6 @@ export const INITIAL_SETTINGS: StoreSettings = {
   whatsappUrl: 'https://wa.me/201000000000',
   instagramUrl: 'https://instagram.com',
   tiktokUrl: 'https://tiktok.com',
-  facebookUrl: 'https://facebook.com',
   freeShippingThreshold: 2000,
   quantityShippingEnabled: false,
   quantityShippingMinItems: 2,
