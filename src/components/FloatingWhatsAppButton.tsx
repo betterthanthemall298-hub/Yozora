@@ -14,11 +14,10 @@ export const FloatingWhatsAppButton: React.FC = () => {
     `مرحباً ${settings.storeName || 'Yozora'}! أود الاستفسار عن الهوديز والمنتجات المتوفرة.`
   );
 
-  const whatsappHref = settings.whatsappUrl
-    ? (settings.whatsappUrl.includes('text=')
-        ? settings.whatsappUrl
-        : `${settings.whatsappUrl}${settings.whatsappUrl.includes('?') ? '&' : '?'}text=${defaultGreeting}`)
-    : `https://api.whatsapp.com/send?phone=${waPhone}&text=${defaultGreeting}`;
+  // Always prefer direct phone API so that the prefilled text is never dropped by WhatsApp shortlinks
+  const whatsappHref = waPhone
+    ? `https://api.whatsapp.com/send?phone=${waPhone}&text=${defaultGreeting}`
+    : (settings.whatsappUrl || 'https://wa.me');
 
   return (
     <aside aria-label="محادثة واتساب المباشرة">
@@ -29,11 +28,8 @@ export const FloatingWhatsAppButton: React.FC = () => {
         rel="noopener noreferrer"
         aria-label="تواصل معنا عبر واتساب"
         title="تواصل معنا عبر واتساب"
-        className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[90] flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#25D366] hover:bg-[#20ba59] active:scale-95 text-white shadow-2xl shadow-emerald-950/70 border-2 border-white/25 transition-all duration-300 hover:scale-110 group select-none cursor-pointer"
+        className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[90] flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#25D366] hover:bg-[#20ba59] active:scale-95 text-white shadow-xl shadow-emerald-950/60 border-2 border-white/20 transition-all duration-300 hover:scale-105 group select-none cursor-pointer"
       >
-        {/* Subtle pulsating ping ring */}
-        <span className="absolute inset-0 rounded-full bg-[#25D366] opacity-35 animate-ping duration-1000 pointer-events-none" />
-
         {/* Official WhatsApp SVG Icon */}
         <svg
           className="w-7 h-7 sm:w-8 sm:h-8 fill-current drop-shadow relative z-10 transition-transform group-hover:scale-105"

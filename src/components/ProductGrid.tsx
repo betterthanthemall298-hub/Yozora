@@ -229,8 +229,8 @@ export const ProductGrid: React.FC = () => {
                 ) : (
                   <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                      {(expandedSections[section.id] ? sectionProducts : sectionProducts.slice(0, 3)).map((product) => (
-                        <ProductCard key={product.id} product={product} />
+                      {(expandedSections[section.id] ? sectionProducts : sectionProducts.slice(0, 3)).map((product, pIdx) => (
+                        <ProductCard key={product.id} product={product} priority={index === 0 && pIdx < 3} />
                       ))}
                     </div>
 

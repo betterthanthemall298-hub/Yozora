@@ -47,9 +47,9 @@ export const CustomerReviewsGallery: React.FC = () => {
     const diff = touchStartX.current - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 40) {
       if (diff > 0) {
-        handleNext();
-      } else {
         handlePrev();
+      } else {
+        handleNext();
       }
     }
     touchStartX.current = null;

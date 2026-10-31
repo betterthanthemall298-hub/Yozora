@@ -6,9 +6,10 @@ import { Heart, ShoppingBag, Star, Check, Share2, Eye } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
+  priority?: boolean;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, priority = false }) => {
   const {
     setSelectedProduct,
     setActiveView,
@@ -32,7 +33,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(priority);
 
   const currentStock = getColorSizeStock(product, currentColor?.name, chosenSize);
   const isCurrentSizeOutOfStock = currentStock <= 0;
@@ -92,7 +93,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <img
           src={product.images?.[activeImageIndex] || product.images?.[0] || ''}
           alt={product.name}
-          loading="lazy"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'auto'}
           decoding="async"
           onLoad={() => setImageLoaded(true)}
           referrerPolicy="no-referrer"

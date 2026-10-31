@@ -1,12 +1,23 @@
 import 'dotenv/config';
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import app from './api/index.ts';
 
 async function start() {
   const PORT = Number(process.env.PORT) || 3000;
   const server = express();
+
+  // Static uploads directory with aggressive browser caching (30 days)
+  const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  server.use('/uploads', express.static(uploadsDir, {
+    maxAge: '30d',
+    immutable: true
+  }));
 
   // Mount API app only for /api prefix so frontend assets and Vite SPA load without interception
   server.use('/api', (req, res, next) => {

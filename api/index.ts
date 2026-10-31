@@ -301,7 +301,7 @@ export function createApp(getDeps: () => Deps) {
     next();
   });
 
-  app.use(express.json({ limit: '100kb' }));
+  app.use(express.json({ limit: '15mb' }));
 
   const wrap =
     (fn: (req: Request, res: Response, deps: Deps) => Promise<any>) =>
@@ -1396,6 +1396,41 @@ export function createApp(getDeps: () => Deps) {
       } catch {}
 
       res.json({ success: true, message: 'تم حذف حساب المسؤول وإلغاء صلاحياته بنجاح' });
+    })
+  );
+
+  // Image upload handler: converts base64/dataUrl to persistent static WebP files
+  app.post(
+    '/api/upload-image',
+    wrap(async (req, res) => {
+      const { dataUrl } = req.body || {};
+      if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/')) {
+        throw new HttpError(400, 'بيانات الصورة غير صحيحة');
+      }
+
+      const match = dataUrl.match(/^data:image\/([a-zA-Z0-9\+\-\.]+);base64,(.+)$/);
+      if (!match) {
+        throw new HttpError(400, 'تنسيق الصورة غير مدعوم');
+      }
+
+      const mimeType = match[1];
+      const ext = mimeType.includes('webp') ? 'webp' : mimeType.includes('png') ? 'png' : 'jpg';
+      const base64Data = match[2];
+      const buffer = Buffer.from(base64Data, 'base64');
+
+      const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+
+      const hash = crypto.createHash('md5').update(buffer).digest('hex').slice(0, 16);
+      const safeName = `img-${Date.now()}-${hash}.${ext}`;
+      const filePath = path.join(uploadsDir, safeName);
+
+      fs.writeFileSync(filePath, buffer);
+      const url = `/uploads/${safeName}`;
+
+      res.json({ success: true, url });
     })
   );
 

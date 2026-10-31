@@ -135,20 +135,36 @@ export async function uploadImageFile(
   quality = 0.82
 ): Promise<string> {
   const compressed = await compressImageFile(file, maxDimension, quality);
+
+  // 1. Upload to backend /api/upload-image for instant static serving and 30-day browser caching
+  try {
+    const res = await fetch('/api/upload-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dataUrl: compressed })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.url) return data.url;
+    }
+  } catch (e) {
+    console.warn('Backend image upload fallback:', e);
+  }
+
+  // 2. Fallback to Firebase Storage if reachable
   try {
     const blob = dataUrlToBlob(compressed);
     const ext = blob.type === "image/webp" ? "webp" : blob.type === "image/png" ? "png" : "jpg";
     const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const fileRef = ref(storage, path);
-    // Timeout after 2.5s to avoid freezing the UI
     const uploadPromise = uploadBytes(fileRef, blob, { contentType: blob.type }).then(() => getDownloadURL(fileRef));
     const timeoutPromise = new Promise<string>((_, reject) =>
-      setTimeout(() => reject(new Error("Storage timeout - fallback to fast inline")), 2500)
+      setTimeout(() => reject(new Error("Storage timeout - fallback to inline")), 1500)
     );
     const downloadUrl = await Promise.race([uploadPromise, timeoutPromise]);
     return downloadUrl;
   } catch {
-    // Seamless fallback to high-fidelity, lightweight WebP data URL
+    // 3. Last fallback to compressed WebP data URL
     return compressed;
   }
 }

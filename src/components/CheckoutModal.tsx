@@ -177,20 +177,26 @@ export const CheckoutModal: React.FC = () => {
         `أرجو تأكيد استلام الطلب والبدء في تجهيز الشحنة. شكراً لكم!`
       ].join('\n');
 
-      const waUrl = settings.whatsappUrl && !settings.whatsappUrl.includes('text=')
-        ? `${settings.whatsappUrl}${settings.whatsappUrl.includes('?') ? '&' : '?'}text=${encodeURIComponent(waMessage)}`
-        : `https://api.whatsapp.com/send?phone=${waPhone}&text=${encodeURIComponent(waMessage)}`;
+      // Copy order details to clipboard as fail-safe backup
+      try {
+        if (navigator?.clipboard?.writeText) {
+          navigator.clipboard.writeText(waMessage);
+        }
+      } catch {}
+
+      // Always use direct phone endpoint to guarantee that WhatsApp pre-fills the message with full order data
+      const waUrl = `https://api.whatsapp.com/send?phone=${waPhone}&text=${encodeURIComponent(waMessage)}`;
 
       // 4. Notify user and close checkout modal
       addToast({
         type: 'success',
         title: 'تم تسجيل طلبك بنجاح! 🚀',
-        description: `طلب #${newOrder.orderNumber} - جاري نقلك إلى واتساب لإتمام التأكيد.`
+        description: `طلب #${newOrder.orderNumber} - تم تجهيز تفاصيل طلبك للإرسال في رسالة واتساب.`
       });
 
       handleClose();
 
-      // 5. Transfer directly to WhatsApp
+      // 5. Transfer directly to WhatsApp with pre-filled order details
       try {
         const opened = window.open(waUrl, '_blank');
         if (!opened || opened.closed || typeof opened.closed === 'undefined') {

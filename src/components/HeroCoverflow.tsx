@@ -57,9 +57,9 @@ export const HeroCoverflow: React.FC = () => {
     const diff = touchStartX.current - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 40) {
       if (diff > 0) {
-        handleNext();
-      } else {
         handlePrev();
+      } else {
+        handleNext();
       }
     }
     touchStartX.current = null;
@@ -175,6 +175,7 @@ export const HeroCoverflow: React.FC = () => {
                     src={product.images[0]}
                     alt={product.name}
                     loading={isCenter ? 'eager' : 'lazy'}
+                    fetchPriority={isCenter ? 'high' : 'auto'}
                     decoding="async"
                     referrerPolicy="no-referrer"
                     className={`w-full h-full object-cover transition-transform duration-500 ${
