@@ -317,7 +317,7 @@ export const QuickLookModal: React.FC = () => {
                       const isSelected = selectedColorIndex === idx;
                       return (
                         <button
-                          key={color.name}
+                          key={`${product.id}-quick-color-${color.name}-${color.hex || ''}-${idx}`}
                           id={`quick-look-color-${idx}`}
                           type="button"
                           onClick={() => {

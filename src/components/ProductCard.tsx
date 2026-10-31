@@ -238,7 +238,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   const isSelected = chosenColorIndex === idx;
                   return (
                     <button
-                      key={clr.name}
+                      key={`${product.id}-color-${clr.name}-${clr.hex || ''}-${idx}`}
                       id={`card-${product.id}-color-${idx}`}
                       type="button"
                       title={clr.name}

@@ -493,11 +493,16 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleAddPColor = () => {
-    if (!pNewColorName.trim()) return;
+    const trimmed = pNewColorName.trim();
+    if (!trimmed) return;
+    if (pColors.some((c) => c.name.trim().toLowerCase() === trimmed.toLowerCase())) {
+      alert(`اللون «${trimmed}» مضاف بالفعل، يمكنك تعديل مخزونه مباشرة.`);
+      return;
+    }
     setPColors((prev) => [
       ...prev,
       {
-        name: pNewColorName.trim(),
+        name: trimmed,
         hex: pNewColorHex || '#171717',
         sizesStock: {
           M: Math.max(0, Number(pNewColorStockM) || 0),
@@ -676,11 +681,16 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleAddEditColor = () => {
-    if (!newColorName.trim()) return;
+    const trimmed = newColorName.trim();
+    if (!trimmed) return;
+    if (editColors.some((c) => c.name.trim().toLowerCase() === trimmed.toLowerCase())) {
+      alert(`اللون «${trimmed}» مضاف بالفعل لهذا المنتج، يمكنك تعديل كمياته مباشرة.`);
+      return;
+    }
     setEditColors((prev) => [
       ...prev,
       {
-        name: newColorName.trim(),
+        name: trimmed,
         hex: newColorHex || '#171717',
         sizesStock: {
           M: Math.max(0, Number(newColorStockM) || 0),

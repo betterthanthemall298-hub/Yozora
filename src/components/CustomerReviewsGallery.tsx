@@ -74,9 +74,9 @@ export const CustomerReviewsGallery: React.FC = () => {
       onTouchEnd={handleTouchEnd}
     >
       {/* Section Header */}
-      <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
+      <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
         <h2 className="text-2xl sm:text-3xl font-black text-stone-100">
-          آراء عملاء يوزورا
+          آراء العملاء وصور المنتج على الطبيعة
         </h2>
       </div>
 
@@ -84,12 +84,12 @@ export const CustomerReviewsGallery: React.FC = () => {
         <div className="bg-stone-900/40 border border-stone-800 rounded-2xl p-10 text-center text-stone-400">
           <ImageIcon className="w-10 h-10 text-stone-600 mx-auto mb-3" />
           <p className="text-sm font-bold text-stone-300">لا توجد آراء مصورة حالياً</p>
-          <p className="text-xs text-stone-500 mt-1">سيتم إضافة لقطات محادثات وآراء المشترين قريباً.</p>
+          <p className="text-xs text-stone-500 mt-1">سيتم إضافة لقطات محادثات وصور حية للمنتجات قريباً.</p>
         </div>
       ) : (
         <div>
           {/* 3D Stretched Infinite Loop Carousel for Reviews */}
-          <div className="relative max-w-4xl mx-auto h-[340px] sm:h-[420px] md:h-[460px] flex items-center justify-center [perspective:1200px]">
+          <div className="relative max-w-4xl mx-auto h-[350px] sm:h-[430px] md:h-[470px] flex items-center justify-center [perspective:1200px]">
             {/* Nav Arrows - Hidden on mobile, swipe only */}
             <button
               id="reviews-prev-btn"
@@ -164,32 +164,32 @@ export const CustomerReviewsGallery: React.FC = () => {
                       zIndex: zIndexStyle,
                       transition: 'all 500ms cubic-bezier(0.25, 1, 0.5, 1)'
                     }}
-                    className={`absolute w-[210px] sm:w-[270px] md:w-[310px] aspect-[3/4] rounded-2xl overflow-hidden bg-stone-900 border cursor-pointer group shadow-2xl ${
+                    className={`absolute w-[220px] sm:w-[280px] md:w-[320px] h-[310px] sm:h-[380px] md:h-[420px] rounded-2xl overflow-hidden bg-stone-950 border cursor-pointer group shadow-2xl flex items-center justify-center p-2 ${
                       isCenter
-                        ? 'border-amber-500/50 shadow-black/80 ring-1 ring-amber-500/30'
-                        : 'border-stone-800 shadow-black/60'
+                        ? 'border-amber-500/60 shadow-black/90 ring-1 ring-amber-500/40 bg-stone-950'
+                        : 'border-stone-800/90 shadow-black/60 bg-stone-950/80'
                     }`}
                   >
                     <img
                       src={item.imageUrl}
-                      alt={item.caption || 'رأي عميل يوزورا'}
+                      alt={item.caption || 'رأي عميل وصورة المنتج على الطبيعة'}
                       loading="lazy"
                       decoding="async"
                       referrerPolicy="no-referrer"
-                      className={`w-full h-full object-cover transition-transform duration-500 ${
-                        isCenter ? 'group-hover:scale-105' : ''
+                      className={`max-w-full max-h-full w-auto h-auto object-contain rounded-xl transition-transform duration-500 ${
+                        isCenter ? 'group-hover:scale-[1.03]' : ''
                       }`}
                     />
                     {/* Hover indicator on center item */}
                     {isCenter && (
-                      <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-4 pointer-events-none">
+                      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3.5 pointer-events-none rounded-2xl">
                         <div className="flex justify-end">
-                          <div className="w-8 h-8 rounded-full bg-stone-900/90 border border-stone-700 text-amber-400 flex items-center justify-center shadow-lg">
+                          <div className="w-8 h-8 rounded-full bg-stone-900/95 border border-stone-700 text-amber-400 flex items-center justify-center shadow-lg">
                             <ZoomIn className="w-4 h-4" />
                           </div>
                         </div>
                         {item.caption && (
-                          <div className="bg-stone-950/90 p-2 rounded-xl border border-stone-800 text-stone-200 text-xs line-clamp-2">
+                          <div className="bg-stone-950/95 p-2 rounded-xl border border-stone-800 text-stone-200 text-xs line-clamp-2">
                             {item.caption}
                           </div>
                         )}

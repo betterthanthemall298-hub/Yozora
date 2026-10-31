@@ -1552,7 +1552,11 @@ function setupFirebaseSync() {
             ...raw,
             sizesStock: raw.sizesStock || { M: 0, L: 0, XL: 0, '2XL': 0 },
             images: Array.isArray(raw.images) ? raw.images : raw.image ? [raw.image] : [],
-            colors: Array.isArray(raw.colors) ? raw.colors : [],
+            colors: Array.isArray(raw.colors)
+              ? raw.colors.filter((c: any, index: number, self: any[]) =>
+                  c && c.name && index === self.findIndex((other: any) => other && other.name === c.name)
+                )
+              : [],
             tags: Array.isArray(raw.tags) ? raw.tags : []
           } as Product);
         });

@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useStore } from '../store/useStore';
 import { ProductCard } from './ProductCard';
 import { HoodieSize, Product, StoreSection } from '../types';
 import { isComingSoon } from '../utils/product';
-import { Sparkles, Layers, Search, PlusCircle, ArrowDown } from 'lucide-react';
+import { Sparkles, Layers, Search, PlusCircle, ArrowDown, ChevronDown } from 'lucide-react';
 import { INITIAL_SECTIONS } from '../data/initialData';
 
 export const ProductGrid: React.FC = () => {
@@ -17,6 +17,15 @@ export const ProductGrid: React.FC = () => {
     isAdminLoggedIn,
     setActiveView
   } = useStore();
+
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }));
+  };
 
   // Ensure sections array is valid and sorted by order
   const activeSections: StoreSection[] = useMemo(() => {
@@ -218,11 +227,35 @@ export const ProductGrid: React.FC = () => {
                     )}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                    {sectionProducts.map((product) => (
-                      <ProductCard key={product.id} product={product} />
-                    ))}
-                  </div>
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                      {(expandedSections[section.id] ? sectionProducts : sectionProducts.slice(0, 3)).map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+
+                    {sectionProducts.length > 3 && (
+                      <div className="mt-8 flex justify-center">
+                        <button
+                          id={`toggle-section-${section.id}-btn`}
+                          type="button"
+                          onClick={() => toggleSection(section.id)}
+                          className="inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-stone-900/90 border border-stone-800 hover:border-amber-500/60 text-stone-200 hover:text-amber-400 hover:bg-stone-850 active:scale-95 transition-all text-xs sm:text-sm font-bold shadow-lg shadow-black/40 group cursor-pointer"
+                        >
+                          <span>
+                            {expandedSections[section.id]
+                              ? 'إخفاء باقي منتجات القسم'
+                              : `إظهار جميع منتجات القسم (${sectionProducts.length})`}
+                          </span>
+                          <ChevronDown
+                            className={`w-4 h-4 text-amber-400 transition-transform duration-300 ${
+                              expandedSections[section.id] ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {/* Elegant separator if not the last section */}

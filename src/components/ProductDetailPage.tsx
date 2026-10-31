@@ -274,7 +274,7 @@ export const ProductDetailPage: React.FC = () => {
                   const isSelected = selectedColorIndex === idx;
                   return (
                     <button
-                      key={clr.name}
+                      key={`${product.id}-detail-color-${clr.name}-${clr.hex || ''}-${idx}`}
                       type="button"
                       onClick={() => {
                         setSelectedColorIndex(idx);

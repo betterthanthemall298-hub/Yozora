@@ -23,6 +23,7 @@ const AdminDashboard = React.lazy(() =>
 import { DeleteConfirmationModal } from './components/DeleteConfirmationModal';
 import { ToastContainer } from './components/ToastContainer';
 import { ShopifyOrderBanner } from './components/ShopifyOrderBanner';
+import { FloatingWhatsAppButton } from './components/FloatingWhatsAppButton';
 import { Footer } from './components/Footer';
 import { trackVisit } from './lib/analytics';
 
@@ -261,6 +262,7 @@ export default function App() {
       <ShopifyOrderBanner />
       <DeleteConfirmationModal />
       <WishlistDrawer />
+      <FloatingWhatsAppButton />
 
       <ProductShareModal />
       <CheckoutModal />
