@@ -244,7 +244,7 @@ export const QuickLookModal: React.FC = () => {
               </div>
               <div className="bg-stone-900/60 p-2 rounded-xl border border-stone-800 text-center">
                 <ShieldCheck className="w-3.5 h-3.5 text-amber-400 mx-auto mb-1" />
-                <span>معاينة قبل الدفع</span>
+                <span>ضمان الجودة</span>
               </div>
               <div className="bg-stone-900/60 p-2 rounded-xl border border-stone-800 text-center">
                 <RotateCcw className="w-3.5 h-3.5 text-amber-400 mx-auto mb-1" />

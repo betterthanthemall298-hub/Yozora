@@ -23,7 +23,7 @@ export function getMarketingShareText(product: Product): string {
     `🔥 *${product.name}* من *Yozora Hoodies*\n` +
     (product.subtitle ? `✨ ${product.subtitle}\n` : '') +
     `💰 السعر: *${product.price} ج.م*${discountText}\n` +
-    `📦 قطن مصري 100% ثقيل مع شحن سريع ومعاينة قبل الاستلام.\n\n` +
+    `📦 قطن مصري 100% ثقيل فاخر مع شحن وتوصيل سريع.\n\n` +
     `🛒 اطلب الآن مباشرة من الرابط:\n` +
     `${url}`
   );

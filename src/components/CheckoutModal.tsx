@@ -172,7 +172,7 @@ export const CheckoutModal: React.FC = () => {
         `💰 *المجموع الفرعي:* ${newOrder.subtotal.toLocaleString()} ج.م`,
         `🚚 *مصاريف الشحن:* ${newOrder.shippingCost === 0 ? 'شحن مجاني' : `${newOrder.shippingCost} ج.م`}`,
         ...(newOrder.discount > 0 ? [`🏷️ *الخصم:* -${newOrder.discount.toLocaleString()} ج.م`] : []),
-        `💵 *الإجمالي النهائي للدفع:* ${newOrder.total.toLocaleString()} ج.م (عند الاستلام)`,
+        `💵 *الإجمالي النهائي المطلوب:* ${newOrder.total.toLocaleString()} ج.م`,
         `━━━━━━━━━━━━━━━━━━`,
         `أرجو تأكيد استلام الطلب والبدء في تجهيز الشحنة. شكراً لكم!`
       ].join('\n');
@@ -225,7 +225,7 @@ export const CheckoutModal: React.FC = () => {
         <div className="p-4 sm:p-5 border-b border-stone-800 flex items-center justify-between bg-stone-950/60">
           <div>
             <h3 className="text-base font-bold text-stone-100">
-              إتمام الطلب والدفع عند الاستلام
+              إتمام وتأكيد الطلب
             </h3>
             <p className="text-xs text-stone-400">
               يرجى إدخال بيانات التوصيل بدقة للتسليم السريع
@@ -420,7 +420,7 @@ export const CheckoutModal: React.FC = () => {
                 )}
               </div>
               <div className="flex justify-between items-baseline text-stone-100 text-base font-black border-t border-stone-800 pt-2">
-                <span>الإجمالي النهائي للدفع:</span>
+                <span>الإجمالي النهائي:</span>
                 <span className="text-amber-400 font-mono text-lg">{grandTotal} ج.م</span>
               </div>
             </div>
@@ -429,11 +429,11 @@ export const CheckoutModal: React.FC = () => {
             <div className="flex items-center justify-between text-[11px] text-stone-400 bg-stone-950/40 p-3 rounded-xl border border-stone-800/60">
               <div className="flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-amber-500" />
-                <span>معاينة القطعة قبل الاستلام</span>
+                <span>ضمان الجودة والخامة الأصلية</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Truck className="w-4 h-4 text-amber-500" />
-                <span>الدفع نقدياً عند الاستلام</span>
+                <span>شحن وتوصيل لكافة المحافظات</span>
               </div>
             </div>
 
